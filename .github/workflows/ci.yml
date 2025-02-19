@@ -1,0 +1,26 @@
+# Build and upload Lean binaries to Cachix cache
+name: Nix CI
+
+on:
+  push:
+    branches: main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and cache Lean
+    runs-on: warp-ubuntu-latest-x64-16x
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: cachix/cachix-action@v14
+        with:
+          name: argumentcomputer
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+      - run: |
+          nix build .#cacheRoots
+
