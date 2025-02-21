@@ -19,6 +19,7 @@
   };
   # Builds a Lean package by reading the manifest file.
   mkPackage = {
+    name ? (importLakeManifest manifestFile).name,
     # Path to the source
     src,
     # Path to the `lake-manifest.json` file
@@ -33,8 +34,8 @@
     manifestDeps = builtins.map (dep: mkPackage (depToPackage dep)) manifest.packages;
   in
     pkgs.lean.buildLeanPackage {
-      inherit (manifest) name;
-      inherit src;
+      inherit name;
+      src = pkgs.lib.cleanSource src;
       roots =
         if builtins.isNull roots
         then [(capitalize manifest.name)]

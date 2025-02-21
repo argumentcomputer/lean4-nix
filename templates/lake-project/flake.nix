@@ -31,12 +31,17 @@
           overlays = [(lean4-nix.readToolchainFile ./lean-toolchain)];
         };
 
-        packages.default =
-          ((lean4-nix.lake {inherit pkgs;}).mkPackage {
+        packages.default = ((lean4-nix.lake {inherit pkgs;}).mkPackage {
+            name = "LakeProject";
             src = ./.;
-            roots = ["Example"];
-          })
-          .executable;
+            roots = ["Main" "LakeProject"]; # Add each `lean_lib` as a root
+          }).executable;
+
+        packages.test = ((lean4-nix.lake {inherit pkgs;}).mkPackage {
+            name = "Test";
+            src = ./.;
+            roots = ["Tests.Add" "LakeProject"];
+          }).executable;
 
         devShells.default = pkgs.mkShell {
           packages = with pkgs.lean; [lean lean-all];
