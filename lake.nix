@@ -19,6 +19,7 @@
   };
   # Builds a Lean package by reading the manifest file.
   mkPackage = {
+    # Package name, useful to disambiguate multiple packages within the same Lake project
     name ? (importLakeManifest manifestFile).name,
     # Path to the source
     src,

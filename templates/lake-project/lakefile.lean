@@ -8,6 +8,7 @@ section Tests
 
 -- Run with `lake exe Tests.Add` or `nix run .#test`
 lean_exe Tests.Add
+lean_exe Tests.Sub
 
 end Tests
 
