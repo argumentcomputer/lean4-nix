@@ -42,16 +42,29 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1740001283,
-        "narHash": "sha256-yAMMF71Mb9I/gxFSuqWB0ExAQO5I9xsL+g99LRSEAaI=",
+        "path": "../../",
+        "type": "path"
+      },
+      "original": {
+        "path": "../../",
+        "type": "path"
+      },
+      "parent": []
+    },
+    "lspec": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1738701903,
+        "narHash": "sha256-nGYQbLHmO1PRgSGUiP1u43gjDa6lbDc60+AoSJZttV4=",
         "owner": "argumentcomputer",
-        "repo": "lean4-nix",
-        "rev": "056fc0260b4d5a66fdcc945d7ca56013cf2aee1d",
+        "repo": "LSpec",
+        "rev": "ca8e2803f89f0c12bf9743ae7abbfb2ea6b0eeec",
         "type": "github"
       },
       "original": {
         "owner": "argumentcomputer",
-        "repo": "lean4-nix",
+        "ref": "ca8e2803f89f0c12bf9743ae7abbfb2ea6b0eeec",
+        "repo": "LSpec",
         "type": "github"
       }
     },
@@ -115,6 +128,7 @@
       "inputs": {
         "flake-parts": "flake-parts",
         "lean4-nix": "lean4-nix",
+        "lspec": "lspec",
         "nixpkgs": "nixpkgs_2"
       }
     }
