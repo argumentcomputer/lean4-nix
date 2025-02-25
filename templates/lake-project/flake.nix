@@ -10,7 +10,6 @@
       url = "github:argumentcomputer/LSpec?ref=ca8e2803f89f0c12bf9743ae7abbfb2ea6b0eeec";
       flake = false;
     };
-
   };
 
   outputs = inputs @ {
@@ -44,10 +43,10 @@
             roots = ["Main" "LakeProject"]; # Add each `lean_lib` as a root
           }).executable;
 
-        packages.lspec = (pkgs.lean.buildLeanPackage {
+        packages.lspec = ((lean4-nix.lake {inherit pkgs;}).mkPackage {
           name = "LSpec";
-          roots = ["Main" "LSpec"];
           src = "${lspec}";
+          roots = ["Main" "LSpec"];
         }).executable;
 
         devShells.default = pkgs.mkShell {
