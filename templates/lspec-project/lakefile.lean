@@ -13,14 +13,14 @@ lean_exe Tests.Sub
 end Tests
 
 -- NOTE: kebab-case in the package name isn't supported with Nix due to `«»` parsing
-package LakeProject where
+package LSpecProject where
   version := v!"0.1.0"
 
 @[default_target]
-lean_lib «LakeProject» where
+lean_lib «LSpecProject» where
   -- add library configuration options here
 
--- Run with `lake exe lake-project` or `nix run`
+-- Run with `lake exe lspec-project` or `nix run`
 @[default_target]
-lean_exe "lake-project" where
+lean_exe "lspec-project" where
   root := `Main

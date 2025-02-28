@@ -22,14 +22,14 @@ jobs:
         with:
           name: argumentcomputer
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-      - name: Patch flake.nix with current commit
+      - name: Patch flake.nix with current commit in template
         run: |
           sed -i 's|github:argumentcomputer/lean4-nix|path:../../|g' flake.nix
-        working-directory : ${{ github.workspace }}/templates/lake-project
+        working-directory : ${{ github.workspace }}/templates/lspec-project
       - run: nix build .#default .#lspec
-        working-directory : ${{ github.workspace }}/templates/lake-project
+        working-directory : ${{ github.workspace }}/templates/lspec-project
       - run: nix run .#lspec
-        working-directory : ${{ github.workspace }}/templates/lake-project
+        working-directory : ${{ github.workspace }}/templates/lspec-project
 
   cache:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'

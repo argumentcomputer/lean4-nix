@@ -1,0 +1,20 @@
+{
+  "version": "1.1.0",
+  "packagesDir": ".lake/packages",
+  "packages": [
+    {
+      "url": "https://github.com/argumentcomputer/LSpec",
+      "type": "git",
+      "subDir": null,
+      "scope": "",
+      "rev": "ca8e2803f89f0c12bf9743ae7abbfb2ea6b0eeec",
+      "name": "LSpec",
+      "manifestFile": "lake-manifest.json",
+      "inputRev": "ca8e2803f89f0c12bf9743ae7abbfb2ea6b0eeec",
+      "inherited": false,
+      "configFile": "lakefile.toml"
+    }
+  ],
+  "name": "LSpecProject",
+  "lakeDir": ".lake"
+}
