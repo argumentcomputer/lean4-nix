@@ -25,6 +25,7 @@
     darwin,
     llvmPackages,
     linkFarmFromDrvs,
+    pkg-config,
     ...
   } @ args:
     with builtins; rec {
@@ -33,7 +34,7 @@
       buildCMake = args:
         stdenv.mkDerivation ({
             nativeBuildInputs = [cmake];
-            buildInputs = [gmp libuv llvmPackages.llvm];
+            buildInputs = [gmp libuv llvmPackages.llvm pkg-config];
             # https://github.com/NixOS/nixpkgs/issues/60919
             hardeningDisable = ["all"];
             dontStrip = args.debug or debug;
