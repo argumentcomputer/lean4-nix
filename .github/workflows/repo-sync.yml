@@ -1,0 +1,30 @@
+# Pull upstream changes from lenianiva/lean4-nix daily at 12am UTC
+name: Repo sync
+
+on:
+  schedule:
+  - cron:  "0 0 * * *"
+  workflow_dispatch:
+  push:
+    branches: ci-sync
+
+jobs:
+  repo-sync:
+    name: Sync upstream changes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: tibdex/github-app-token@v2
+        id: generate-token
+        with:
+          app_id: ${{ secrets.TOKEN_APP_ID }}
+          private_key: ${{ secrets.TOKEN_APP_PRIVATE_KEY }}
+      - name: repo-sync
+        uses: repo-sync/github-sync@v2
+        with:
+          source_repo: "https://github.com/lenianiva/lean4-nix"
+          source_branch: "main"
+          destination_branch: "main"
+          github_token: ${{ steps.generate-token.outputs.token }}
