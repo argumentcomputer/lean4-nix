@@ -3,7 +3,7 @@ name: Nix CI
 
 on:
   push:
-    branches: [dev, fixes]
+    branches: dev
   workflow_dispatch:
 
 concurrency:
@@ -13,7 +13,7 @@ concurrency:
 jobs:
   build:
     name: Build and cache Lean
-    runs-on: warp-ubuntu-latest-x64-32x
+    runs-on: warp-ubuntu-latest-x64-16x
     steps:
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v30
