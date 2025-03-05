@@ -3,7 +3,7 @@ name: Nix CI
 
 on:
   push:
-    branches: [dev, fixes]
+    branches: ["dev", "v4.16.0"]
   workflow_dispatch:
 
 concurrency:
