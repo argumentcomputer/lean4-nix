@@ -1,4 +1,3 @@
 !.gitignore
-templates/**/flake.lock
 **/result*
 **/.lake
