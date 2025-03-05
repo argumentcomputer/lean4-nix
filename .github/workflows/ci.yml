@@ -16,11 +16,15 @@ jobs:
     runs-on: warp-ubuntu-latest-x64-16x
     steps:
       - uses: actions/checkout@v4
-      - uses: DeterminateSystems/nix-installer-action@main
-      - uses: cachix/cachix-action@v14
+      - uses: cachix/install-nix-action@v30
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: cachix/cachix-action@v15
         with:
           name: argumentcomputer
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-      - run: |
-          nix build .#cacheRoots
+      - run: nix build .#cacheRoots
+      - run: nix build
+        working-directory: ${{ github.workspace }}/templates/minimal
 
