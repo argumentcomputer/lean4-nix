@@ -1,0 +1,15 @@
+{"version": "1.1.0",
+ "packagesDir": ".lake/packages",
+ "packages":
+ [{"url": "https://github.com/argumentcomputer/Blake3.lean",
+   "type": "git",
+   "subDir": null,
+   "scope": "",
+   "rev": "29018d578b043f6638907f3425af839eec345361",
+   "name": "Blake3",
+   "manifestFile": "lake-manifest.json",
+   "inputRev": "29018d578b043f6638907f3425af839eec345361",
+   "inherited": false,
+   "configFile": "lakefile.lean"}],
+ "name": "ffi",
+ "lakeDir": ".lake"}
