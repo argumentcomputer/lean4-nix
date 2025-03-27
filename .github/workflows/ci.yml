@@ -3,7 +3,7 @@ name: Nix CI
 
 on:
   push:
-    branches: dev
+    branches: [dev, ffi-template]
   workflow_dispatch:
 
 concurrency:
