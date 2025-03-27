@@ -1,4 +1,4 @@
-import RustFFI
+import FFIRust
 
 def main : IO Unit :=
   IO.println s!"Hello, world!"

@@ -1,14 +1,20 @@
 import Lake
 open Lake DSL
 
-package "rust-ffi" where
+-- NOTE: We can't use a hyphen in the package name as it will be exported to `lake-manifest.json` as "«ffi-rust»".
+-- Nix fails to parse the `«»` chars properly because they can't be used in a file path
+-- The error would look something like this:
+-- ```
+-- > clang: error: no such file or directory: '$/nix/store/<hash>--ffi-rust--lib/lib302253ffi-rust302273.a'
+-- ```
+package "ffi_rust" where
   version := v!"0.1.0"
 
-lean_lib «RustFFI» where
+lean_lib «FFIRust» where
   -- add library configuration options here
 
 @[default_target]
-lean_exe "rust-ffi" where
+lean_exe "ffi-rust" where
   root := `Main
 
 require LSpec from git

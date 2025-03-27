@@ -65,7 +65,7 @@ let
   # Fetches external dependencies
   leanPkgBase = (lean4-nix.lake { inherit pkgs; }).mkPackage {
       src = ./.;
-      roots = ["RustFFI" "Main"];
+      roots = ["FFIRust" "Main"];
   };
   # Builds final library and links to FFI static libs
   # Any external FFI libraries must be linked explicitly in `linkFlags`, per
@@ -74,16 +74,16 @@ let
     name = "ffi_rust";
     src = ./.;
     deps = [ leanPkgBase ];
-    roots = ["RustFFI" "Main"];
-    linkFlags = [ "-L${rustPkg}/lib" "-lffi_rs" "-L${cPkg}/lib" "-lffi_c" ];
+    roots = ["FFIRust" "Main"];
+    linkFlags = [ "-L${rustPkg}/lib" "-lffi_rust" "-L${cPkg}/lib" "-lffi_c" ];
   });
   # Builds test package
   leanTest = (pkgs.lean.buildLeanPackage {
     name = "ffi_test";
     src = ./.;
     deps = [ leanPkg ];
-    roots = ["Tests.Main" "RustFFI"];
-    linkFlags = [ "-L${rustPkg}/lib" "-lffi_rs" "-L${cPkg}/lib" "-lffi_c" ];
+    roots = ["Tests.Main" "FFIRust"];
+    linkFlags = [ "-L${rustPkg}/lib" "-lffi_rust" "-L${cPkg}/lib" "-lffi_c" ];
   });
   lib = {
     inherit

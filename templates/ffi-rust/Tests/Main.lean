@@ -1,4 +1,4 @@
-import RustFFI
+import FFIRust
 import LSpec
 
 open LSpec

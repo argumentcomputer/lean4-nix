@@ -11,5 +11,5 @@
    "inputRev": "0f9008e70927c4afac8ad2bc32f2f4fbda044096",
    "inherited": false,
    "configFile": "lakefile.toml"}],
- "name": "«rust-ffi»",
+ "name": "ffi_rust",
  "lakeDir": ".lake"}
