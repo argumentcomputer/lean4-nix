@@ -27,5 +27,5 @@ jobs:
       - run: nix build .#cacheRoots
       - run: nix flake check
       - run: nix run .#test
-        working-directory: ${{ github.workspace }}/templates/rust-ffi
+        working-directory: ${{ github.workspace }}/templates/ffi-rust
 
