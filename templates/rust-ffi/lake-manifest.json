@@ -1,0 +1,15 @@
+{"version": "1.1.0",
+ "packagesDir": ".lake/packages",
+ "packages":
+ [{"url": "https://github.com/argumentcomputer/LSpec",
+   "type": "git",
+   "subDir": null,
+   "scope": "",
+   "rev": "0f9008e70927c4afac8ad2bc32f2f4fbda044096",
+   "name": "LSpec",
+   "manifestFile": "lake-manifest.json",
+   "inputRev": "0f9008e70927c4afac8ad2bc32f2f4fbda044096",
+   "inherited": false,
+   "configFile": "lakefile.toml"}],
+ "name": "«rust-ffi»",
+ "lakeDir": ".lake"}

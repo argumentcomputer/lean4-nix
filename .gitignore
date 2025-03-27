@@ -1,3 +1,4 @@
 !.gitignore
 **/result*
 **/.lake
+**/target
