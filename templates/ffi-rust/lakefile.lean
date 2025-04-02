@@ -18,7 +18,7 @@ lean_exe "ffi-rust" where
   root := `Main
 
 require LSpec from git
-  "https://github.com/argumentcomputer/LSpec" @ "0f9008e70927c4afac8ad2bc32f2f4fbda044096"
+  "https://github.com/argumentcomputer/LSpec" @ "a6652a48b5c67b0d8dd3930fad6390a97d127e8d"
 
 section Tests
 

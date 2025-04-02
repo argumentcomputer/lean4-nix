@@ -1,10 +1,11 @@
 import Lake
 open Lake DSL
 
-require aesop from git
-  "https://github.com/leanprover-community/aesop.git" @ "v4.17.0"
+require Blake3 from git
+  "https://github.com/argumentcomputer/Blake3.lean/" @ "929682f937d6b5fec4958472af621fce991b7169"
 
 package Example
 
 @[default_target]
-lean_lib Example
+lean_exe Example where
+  root := `Main

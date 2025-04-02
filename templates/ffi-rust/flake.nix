@@ -24,13 +24,6 @@
         "x86_64-darwin"
         "x86_64-linux"
       ];
-      
-      # Exporting the library as a flake allows other packages to use the FFI static libraries
-      flake = {
-        lib = import ./lib.nix;
-        inputs.fenix = fenix;
-        inputs.crane = crane;
-      };
 
       perSystem = { system, pkgs, ... }:
       let
@@ -42,10 +35,12 @@
           overlays = [(lean4-nix.readToolchainFile ./lean-toolchain)];
         };
 
-        packages = {
-          default = lib.leanPkg.executable;
-          test = lib.leanTest.executable;
-        };
+        packages.default = ((lean4-nix.lake {inherit pkgs;}).mkPackage {
+          src = ./.;
+          roots = ["FFIRust" "Tests.Main"];
+          deps = [ lib.leanPkg ];
+          staticLibDeps = [ "${lib.rustPkg}/lib" "${lib.cPkg}/lib" ];
+        }).executable;
 
         devShells.default = pkgs.mkShell {
           LEAN_SYSROOT="${pkgs.lean.lean-all}";
