@@ -25,6 +25,7 @@ jobs:
           name: argumentcomputer
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
       - run: nix build .#cacheRoots
-      - run: nix build
-        working-directory: ${{ github.workspace }}/templates/minimal
+      - run: nix flake check
+      - run: nix run .#test
+        working-directory: ${{ github.workspace }}/templates/ffi-rust
 
