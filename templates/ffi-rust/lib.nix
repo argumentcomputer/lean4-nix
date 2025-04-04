@@ -62,35 +62,19 @@ let
   };
 
   # Lean package
-  # Fetches external dependencies
-  leanPkgBase = (lean4-nix.lake { inherit pkgs; }).mkPackage {
-      src = ./.;
-      roots = ["FFIRust" "Main"];
-  };
-  # Builds final library and links to FFI static libs
-  # Any external FFI libraries must be linked explicitly in `linkFlags`, per
-  # https://github.com/argumentcomputer/lean4-nix/issues/8
-  leanPkg = (pkgs.lean.buildLeanPackage {
-    name = "ffi_rust";
+  # Any external FFI libraries must be linked explicitly in `staticLibDeps`
+  leanPkg = ((lean4-nix.lake {inherit pkgs;}).mkPackage {
     src = ./.;
-    deps = [ leanPkgBase ];
     roots = ["FFIRust" "Main"];
-    linkFlags = [ "-L${rustPkg}/lib" "-lffi_rust" "-L${cPkg}/lib" "-lffi_c" ];
+    staticLibDeps = [ "${rustPkg}/lib" "${cPkg}/lib" ];
   });
-  # Builds test package
-  leanTest = (pkgs.lean.buildLeanPackage {
-    name = "ffi_test";
-    src = ./.;
-    deps = [ leanPkg ];
-    roots = ["Tests.Main" "FFIRust"];
-    linkFlags = [ "-L${rustPkg}/lib" "-lffi_rust" "-L${cPkg}/lib" "-lffi_c" ];
-  });
+
   lib = {
     inherit
       rustToolchain
-      leanPkg
-      leanTest
-      cPkg;
+      cPkg
+      rustPkg
+      leanPkg;
   };
 in
 {
