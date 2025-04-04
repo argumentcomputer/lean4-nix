@@ -1,4 +1,4 @@
-# Build and upload Lean binaries to Cachix cache
+# Build, test, and upload Lean binaries to Cachix cache
 name: Nix CI
 
 on:
