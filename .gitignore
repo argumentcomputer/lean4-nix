@@ -2,3 +2,4 @@
 **/result*
 **/.lake
 **/target
+templates/**/flake.lock
