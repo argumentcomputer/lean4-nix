@@ -41,8 +41,6 @@
           inherit (pkgs.lean) leanshared lean leanc lean-all lake cacheRoots;
         };
 
-        checks = import ./checks.nix {inherit pkgs;};
-
         formatter = pkgs.alejandra;
       };
     };

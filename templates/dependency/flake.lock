@@ -141,18 +141,14 @@
         ]
       },
       "locked": {
-        "lastModified": 1743712665,
-        "narHash": "sha256-NZo+2eqQO3YnwYBx6B+mcIpnet8YgD5zOT5FFUgruyM=",
-        "owner": "argumentcomputer",
-        "repo": "lean4-nix",
-        "rev": "4be3233202910e1ef352d4f99e3527ec67513849",
-        "type": "github"
+        "path": "../..",
+        "type": "path"
       },
       "original": {
-        "owner": "argumentcomputer",
-        "repo": "lean4-nix",
-        "type": "github"
-      }
+        "path": "../..",
+        "type": "path"
+      },
+      "parent": []
     },
     "nixpkgs": {
       "locked": {

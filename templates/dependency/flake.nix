@@ -5,7 +5,7 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
     lean4-nix = {
-      url = "github:argumentcomputer/lean4-nix";
+      url = "path:../..";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     blake3-lean = {
