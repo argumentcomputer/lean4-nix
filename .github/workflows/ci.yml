@@ -49,7 +49,14 @@ jobs:
           name: argumentcomputer
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
           skipPush: true
+      - name: Set sed in-place argument for MacOS
+        run: |
+          if [[ "${{ matrix.os }}" == "warp-macos-latest-arm64-6x" ]]; then
+            echo "SED_ARG=-i ''" | tee -a $GITHUB_ENV
+          else
+            echo "SED_ARG=-i" | tee -a $GITHUB_ENV
+          fi
       - run: |
-          sed -i '/lean4-nix = {/,/};/s|url = "github:[^"]*"|url = "path:../.."|' flake.nix
+          sed ${{ env.SED_ARG }} '/lean4-nix = {/,/};/s|url = "github:[^"]*"|url = "path:../.."|' flake.nix
           nix run
         working-directory: ${{ github.workspace }}/templates/${{ matrix.template }}
