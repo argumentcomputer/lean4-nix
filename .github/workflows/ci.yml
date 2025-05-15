@@ -16,8 +16,7 @@ jobs:
     name: Build and cache lean4-nix
     strategy:
       matrix:
-        #os: [warp-ubuntu-latest-x64-16x, warp-macos-latest-arm64-6x]
-        os: [warp-ubuntu-latest-x64-16x]
+        os: [warp-ubuntu-latest-x64-16x, warp-macos-latest-arm64-6x]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -36,8 +35,7 @@ jobs:
     needs: build
     strategy:
       matrix:
-        #os: [ubuntu-latest, warp-macos-latest-arm64-6x]
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, warp-macos-latest-arm64-6x]
         template: [minimal, dependency, ffi-rust]
     runs-on: ${{ matrix.os }}
     steps:
