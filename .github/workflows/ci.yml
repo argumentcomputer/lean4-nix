@@ -1,4 +1,4 @@
-# Build, test, and upload Lean binaries to Cachix cache
+# Build, test, and upload Lean binaries to Cachix cache for x86_64-linux and aarch64-darwin
 name: Nix CI
 
 on:
@@ -14,7 +14,10 @@ concurrency:
 jobs:
   build:
     name: Build and cache lean4-nix
-    runs-on: warp-ubuntu-latest-x64-16x
+    strategy:
+      matrix:
+        os: [warp-ubuntu-latest-x64-16x, warp-macos-latest-arm64-6x]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v31
@@ -30,10 +33,11 @@ jobs:
   test:
     name: Test templates
     needs: build
-    runs-on: ubuntu-latest
     strategy:
       matrix:
+        os: [ubuntu-latest, warp-macos-latest-arm64-6x]
         template: [minimal, dependency, ffi-rust]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v31
@@ -45,7 +49,17 @@ jobs:
           name: argumentcomputer
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
           skipPush: true
+      - name: Set sed in-place argument for MacOS
+        run: |
+          if [[ "${{ matrix.os }}" == "warp-macos-latest-arm64-6x" ]]; then
+            echo "SED_ARG=-i ''" | tee -a $GITHUB_ENV
+          else
+            echo "SED_ARG=-i" | tee -a $GITHUB_ENV
+          fi
       - run: |
-          sed -i '/lean4-nix = {/,/};/s|url = "github:[^"]*"|url = "path:../.."|' flake.nix
-          nix run
+          sed ${{ env.SED_ARG }} '/lean4-nix = {/,/};/s|url = "github:[^"]*"|url = "path:../.."|' flake.nix
+          head -n 20 flake.nix
+          nix flake update lean4-nix
+        working-directory: ${{ github.workspace }}/templates/${{ matrix.template }}
+      - run: nix run
         working-directory: ${{ github.workspace }}/templates/${{ matrix.template }}

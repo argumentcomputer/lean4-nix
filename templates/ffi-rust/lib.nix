@@ -38,7 +38,7 @@ let
     # Final `buildPhase` instructions
     buildSteps = buildCmd ++
     [
-      "ar rcs libffi_c.a ${builtins.concatStringsSep " " (builtins.map (file: "-o ${file}.o") cFiles)}"
+      "ar rcs libffi_c.a ${builtins.concatStringsSep " " (builtins.map (file: "${file}.o") cFiles)}"
     ];
     # Gets all header files in `./c`
     hFiles = getFiles ".h";

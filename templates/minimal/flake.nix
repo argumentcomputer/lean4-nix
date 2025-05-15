@@ -7,6 +7,7 @@
     lean4-nix = {
       url = "github:argumentcomputer/lean4-nix";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-parts.follows = "flake-parts";
     };
   };
 
