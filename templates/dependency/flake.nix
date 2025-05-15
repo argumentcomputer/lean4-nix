@@ -7,10 +7,13 @@
     lean4-nix = {
       url = "github:argumentcomputer/lean4-nix";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-parts.follows = "flake-parts";
     };
     blake3-lean = {
       url = "github:argumentcomputer/Blake3.lean";
+      inputs.lean4-nix.follows = "lean4-nix";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.flake-parts.follows = "flake-parts";
     };
   };
 

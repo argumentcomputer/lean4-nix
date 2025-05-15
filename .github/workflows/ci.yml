@@ -29,7 +29,6 @@ jobs:
         with:
           name: argumentcomputer
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-      - run: nix flake update
       - run: nix build .#cacheRoots
 
   test:
@@ -62,6 +61,7 @@ jobs:
       - run: |
           sed ${{ env.SED_ARG }} '/lean4-nix = {/,/};/s|url = "github:[^"]*"|url = "path:../.."|' flake.nix
           head -n 20 flake.nix
+          nix flake update lean4-nix
         working-directory: ${{ github.workspace }}/templates/${{ matrix.template }}
       - run: nix run
         working-directory: ${{ github.workspace }}/templates/${{ matrix.template }}
