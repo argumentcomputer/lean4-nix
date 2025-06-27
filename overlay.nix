@@ -1,5 +1,4 @@
 let
-  manifests = import ./manifests;
   readSrc = {
     src,
     bootstrap,
@@ -28,20 +27,31 @@ let
     readFromGit {
       args = {
         url = "https://github.com/leanprover/lean4.git";
-        shallow = true;
         ref = "refs/tags/${tag}";
         inherit rev;
       };
       inherit bootstrap;
     };
-  tags = builtins.mapAttrs (tag: manifest: readRev {inherit (manifest) tag rev bootstrap;}) manifests;
   readToolchain = toolchain:
     builtins.addErrorContext "Only leanprover/lean4:{tag} toolchains are supported" (let
       matches = builtins.match "^[[:space:]]*leanprover/lean4:([a-zA-Z0-9\\-\\.]+)[[:space:]]*$" toolchain;
       tag = builtins.head matches;
-    in
-      builtins.getAttr tag tags);
+      manifests = import ./manifests.nix;
+      rev =
+        if builtins.hasAttr tag manifests
+        then manifests.${tag}
+        else builtins.throw "No manifest for tag '${tag}' in manifests.nix";
+      tagSrc = builtins.fetchGit {
+        url = "https://github.com/argumentcomputer/lean4-nix-manifests.git";
+        ref = "refs/tags/${tag}";
+        inherit rev;
+      };
+      manifest = import (tagSrc.outPath + "/bootstrap.nix");
+      in
+        readRev { inherit (manifest) tag rev bootstrap; }
+    );
+
   readToolchainFile = toolchainFile: readToolchain (builtins.readFile toolchainFile);
 in {
-  inherit readSrc readFromGit readRev tags readToolchain readToolchainFile;
+  inherit readSrc readFromGit readRev readToolchain readToolchainFile;
 }
