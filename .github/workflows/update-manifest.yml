@@ -1,20 +1,14 @@
 name: Update Lean toolchain manifest
 
 on:
-  push:
-    branches: [ci-manifest]
   workflow_dispatch:
-  #workflow_trigger:
+  repository_dispatch:
+    types: [update-manifest]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
-# Whenever tags are updated in lean4-nix-manifests, or manually triggered
-# Go through all tags & refs for lean4-nix-manifests and write them to manifests.nix
-# Update the template versions to latest manifest
-# Commit changes to new branch
-# Open PR to `dev`
 jobs:
   update:
     name: Update Lean manifest
