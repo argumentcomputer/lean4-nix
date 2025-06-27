@@ -49,5 +49,5 @@ jobs:
           # Update all toolchain files to new version
           rg --files templates/**/lean-toolchain | xargs sed -i "s|lean4:.*|lean4:$NEW_VERSION|g"
       - run: git diff
-      #- name: Create pull request with changes
-      #  uses: peter-evans/create-pull-request@v7
+      - name: Create pull request with changes
+        uses: peter-evans/create-pull-request@v7
