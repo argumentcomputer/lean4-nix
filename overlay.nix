@@ -39,6 +39,8 @@ let
       tagSrc = builtins.fetchGit {
         url = "https://github.com/argumentcomputer/lean4-nix.git";
         ref = "refs/tags/${tag}";
+        # Update this when the commit changes. `nix build` will print the correct hash on error
+        narHash = "sha256-UsS42vHKe9TUXXj6gRlDXZ5qUx2akBW8tRPD2ziQLgE=";
       };
       manifest = import (tagSrc.outPath + "/lib/bootstrap.nix");
       in

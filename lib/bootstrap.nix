@@ -1,6 +1,6 @@
 {
-  tag = "v4.11.0";
-  rev = "ec3042d94bd11a42430f9e14d39e26b1f880f99b";
+  tag = "v4.18.0";
+  rev = "11ccbced796476be020459a83c599b301a765d3e";
   bootstrap = {
     src,
     debug ? false,
@@ -10,6 +10,8 @@
     lib,
     cmake,
     gmp,
+    libuv,
+    cadical,
     git,
     gnumake,
     bash,
@@ -23,6 +25,7 @@
     darwin,
     llvmPackages,
     linkFarmFromDrvs,
+    pkg-config,
     ...
   } @ args:
     with builtins; rec {
@@ -31,7 +34,7 @@
       buildCMake = args:
         stdenv.mkDerivation ({
             nativeBuildInputs = [cmake];
-            buildInputs = [gmp llvmPackages.llvm];
+            buildInputs = [gmp libuv llvmPackages.llvm pkg-config];
             # https://github.com/NixOS/nixpkgs/issues/60919
             hardeningDisable = ["all"];
             dontStrip = args.debug or debug;
@@ -43,7 +46,7 @@
           // args
           // {
             src = args.realSrc or (sourceByRegex args.src ["[a-z].*" "CMakeLists\.txt"]);
-            cmakeFlags = (args.cmakeFlags or ["-DSTAGE=1" "-DPREV_STAGE=./faux-prev-stage" "-DUSE_GITHASH=OFF"]) ++ (args.extraCMakeFlags or extraCMakeFlags) ++ lib.optional (args.debug or debug) ["-DCMAKE_BUILD_TYPE=Debug"];
+            cmakeFlags = (args.cmakeFlags or ["-DSTAGE=1" "-DPREV_STAGE=./faux-prev-stage" "-DUSE_GITHASH=OFF" "-DCADICAL=${cadical}/bin/cadical"]) ++ (args.extraCMakeFlags or extraCMakeFlags) ++ lib.optional (args.debug or debug) ["-DCMAKE_BUILD_TYPE=Debug"];
             preConfigure =
               args.preConfigure
               or ""
@@ -55,11 +58,7 @@
       lean-bin-tools-unwrapped = buildCMake {
         name = "lean-bin-tools";
         outputs = ["out" "leanc_src"];
-        realSrc = sourceByRegex (src + "/src") ["CMakeLists\.txt" "cmake.*" "bin.*" "include.*" ".*\.in" "Leanc\.lean"];
-        preConfigure = ''
-          touch empty.cpp
-          sed -i 's/add_subdirectory.*//;s/set(LEAN_OBJS.*/set(LEAN_OBJS empty.cpp)/' CMakeLists.txt
-        '';
+        realSrc = sourceByRegex (src + "/src") ["CMakeLists\.txt" "[a-z].*" ".*\.in" "Leanc\.lean"];
         dontBuild = true;
         installPhase = ''
           mkdir $out $leanc_src
@@ -74,11 +73,10 @@
       leancpp = buildCMake {
         name = "leancpp";
         src = src + "/src";
-        buildFlags = ["leancpp" "leanrt" "leanrt_initial-exec" "shell"];
+        buildFlags = ["leancpp" "leanrt" "leanrt_initial-exec" "leanshell" "leanmain"];
         installPhase = ''
           mkdir -p $out
           mv lib/ $out/
-          mv shell/CMakeFiles/shell.dir/lean.cpp.o $out/lib
           mv runtime/libleanrt_initial-exec.a $out/lib
         '';
       };
@@ -159,12 +157,18 @@
           Lean = attachSharedLib leanshared Lean' // {allExternalDeps = [Std];};
           Lake = build {
             name = "Lake";
+            sharedLibName = "Lake_shared";
             src = src + "/src/lake";
             deps = [Init Lean];
           };
           Lake-Main = build {
-            name = "Lake.Main";
-            roots = ["Lake.Main"];
+            name = "LakeMain";
+            roots = [
+              {
+                glob = "one";
+                mod = "LakeMain";
+              }
+            ];
             executableName = "lake";
             deps = [Lake];
             linkFlags = lib.optional stdenv.isLinux "-rdynamic";
@@ -199,6 +203,15 @@
               touch empty.c
               ${stdenv.cc}/bin/cc -shared -o $out/$libName empty.c
             '';
+          leanshared_1 =
+            runCommand "leanshared_1" {
+              buildInputs = [stdenv.cc];
+              libName = "leanshared_1${stdenv.hostPlatform.extensions.sharedLibrary}";
+            } ''
+              mkdir $out
+              touch empty.c
+              ${stdenv.cc}/bin/cc -shared -o $out/$libName empty.c
+            '';
           leanshared =
             runCommand "leanshared" {
               buildInputs = [stdenv.cc];
@@ -208,8 +221,8 @@
               LEAN_CC=${stdenv.cc}/bin/cc ${lean-bin-tools-unwrapped}/bin/leanc -shared ${lib.optionalString stdenv.isLinux "-Wl,-Bsymbolic"} \
                 ${
                 if stdenv.isDarwin
-                then "-Wl,-force_load,${Init.staticLib}/libInit.a -Wl,-force_load,${Std.staticLib}/libStd.a -Wl,-force_load,${Lean.staticLib}/libLean.a -Wl,-force_load,${leancpp}/lib/lean/libleancpp.a ${leancpp}/lib/libleanrt_initial-exec.a -lc++"
-                else "-Wl,--whole-archive -lInit -lStd -lLean -lleancpp ${leancpp}/lib/libleanrt_initial-exec.a -Wl,--no-whole-archive -lstdc++"
+                then "-Wl,-force_load,${Init.staticLib}/libInit.a -Wl,-force_load,${Std.staticLib}/libStd.a -Wl,-force_load,${Lean.staticLib}/libLean.a -Wl,-force_load,${leancpp}/lib/lean/libleancpp.a ${leancpp}/lib/libleanrt_initial-exec.a ${leancpp}/lib/temp/libleanshell.a -lc++"
+                else "-Wl,--whole-archive ${leancpp}/lib/temp/libleanshell.a -lInit -lStd -lLean -lleancpp ${leancpp}/lib/libleanrt_initial-exec.a -Wl,--no-whole-archive -lstdc++"
               } \
                 -lm ${stdlibLinkFlags} \
                 $(${llvmPackages.libllvm.dev}/bin/llvm-config --ldflags --libs) \
@@ -218,18 +231,22 @@
           mods = foldl' (mods: pkg: mods // pkg.mods) {} stdlib;
           print-paths = Lean.makePrintPathsFor [] mods;
           leanc = writeShellScriptBin "leanc" ''
-            LEAN_CC=${stdenv.cc}/bin/cc ${Leanc.executable}/bin/leanc -I${lean-bin-tools-unwrapped}/include ${stdlibLinkFlags} -L${libInit_shared} -L${leanshared} "$@"
+            LEAN_CC=${stdenv.cc}/bin/cc ${Leanc.executable}/bin/leanc -I${lean-bin-tools-unwrapped}/include ${stdlibLinkFlags} -L${libInit_shared} -L${leanshared_1} -L${leanshared} -L${Lake.sharedLib} "$@"
           '';
           lean = runCommand "lean" {buildInputs = lib.optional stdenv.isDarwin darwin.cctools;} ''
             mkdir -p $out/bin
-            ${leanc}/bin/leanc ${leancpp}/lib/lean.cpp.o ${libInit_shared}/* ${leanshared}/* -o $out/bin/lean
+            ${leanc}/bin/leanc ${leancpp}/lib/temp/libleanmain.a ${
+              if stdenv.isDarwin
+              then "${leancpp}/lib/temp/libleanshell.a"
+              else ""
+            } ${libInit_shared}/* ${leanshared_1}/* ${leanshared}/* -o $out/bin/lean
           '';
           # derivation following the directory layout of the "basic" setup, mostly useful for running tests
           lean-all = stdenv.mkDerivation {
             name = "lean-${desc}";
             buildCommand = ''
               mkdir -p $out/bin $out/lib/lean
-              ln -sf ${leancpp}/lib/lean/* ${lib.concatMapStringsSep " " (l: "${l.modRoot}/* ${l.staticLib}/*") (lib.reverseList stdlib)} ${libInit_shared}/* ${leanshared}/* $out/lib/lean/
+              ln -sf ${leancpp}/lib/lean/* ${lib.concatMapStringsSep " " (l: "${l.modRoot}/* ${l.staticLib}/*") (lib.reverseList stdlib)} ${libInit_shared}/* ${leanshared_1}/* ${leanshared}/* ${Lake.sharedLib}/* $out/lib/lean/
               # put everything in a single final derivation so `IO.appDir` references work
               cp ${lean}/bin/lean ${leanc}/bin/leanc ${Lake-Main.executable}/bin/lake $out/bin
               # NOTE: `lndir` will not override existing `bin/leanc`
@@ -251,7 +268,7 @@
           test = buildCMake {
             name = "lean-test-${desc}";
             realSrc = lib.sourceByRegex src ["src.*" "tests.*"];
-            buildInputs = [gmp perl git];
+            buildInputs = [gmp libuv perl git cadical];
             preConfigure = ''
               cd src
             '';
@@ -262,7 +279,7 @@
               ln -sf ${lean-all}/* .
             '';
             buildPhase = ''
-              ctest --output-junit test-results.xml --output-on-failure -E 'leancomptest_(doc_example|foreign)' -j$NIX_BUILD_CORES
+              ctest --output-junit test-results.xml --output-on-failure -E 'leancomptest_(doc_example|foreign)|leanlaketest_reverse-ffi' -j$NIX_BUILD_CORES
             '';
             installPhase = ''
               mkdir $out
@@ -272,7 +289,7 @@
           update-stage0 = let
             cTree = symlinkJoin {
               name = "cs";
-              paths = map (lib: lib.cTree) stdlib;
+              paths = map (lib: lib.cTree) (stdlib ++ [Lake-Main]);
             };
           in
             writeShellScriptBin "update-stage0" ''
