@@ -1,4 +1,4 @@
-.*
+**/.lake
 !.gitignore
 /result
 templates/**/flake.lock
