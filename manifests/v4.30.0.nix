@@ -174,8 +174,12 @@
           "leanshell"
           "leanmain"
         ];
-        preConfigure = ''
+        preConfigure = let
+          # Patch the directory to `Leanc.lean`, which should not be needed but is needed for some reason
+          leanc-key = "\${LEAN_SOURCE_DIR}/Leanc.lean";
+        in ''
           # CMakeLists expects ../tests from repo root.
+          substituteInPlace CMakeLists.txt --replace '${leanc-key}' '${src}/src/Leanc.lean'
           substituteInPlace CMakeLists.txt --replace 'add_subdirectory(../tests' 'add_subdirectory(${src}/tests'
         '';
         installPhase = ''
