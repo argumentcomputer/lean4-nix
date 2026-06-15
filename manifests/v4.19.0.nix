@@ -51,25 +51,6 @@
       rev = "v2.2.3";
       sha256 = "sha256-B0gngv16WFLBtrtG5NqA2m5e95bYVcQraeITcOX9A74=";
     };
-    mimalloc-patch =
-      pkgs.writeText "mimalloc.patch"
-      ''
-        --- a/CMakeLists.txt
-        +++ b/CMakeLists.txt
-        @@ -68,11 +68,7 @@
-         if (USE_MIMALLOC)
-           ExternalProject_add(mimalloc
-             PREFIX mimalloc
-        -    GIT_REPOSITORY https://github.com/microsoft/mimalloc
-        -    GIT_TAG v2.2.3
-        -    # just download, we compile it as part of each stage as it is small
-        -    CONFIGURE_COMMAND ""
-        -    BUILD_COMMAND ""
-        +    SOURCE_DIR "${mimalloc-src}"
-             INSTALL_COMMAND "")
-           list(APPEND EXTRA_DEPENDS mimalloc)
-         endif()
-      '';
   in
     with builtins; rec {
       inherit stdenv;
@@ -77,7 +58,7 @@
         name = "lean-src";
         inherit (args0) src;
 
-        patches = [mimalloc-patch];
+        patches = [patch/v4.19.0-mimalloc.patch];
         postPatch = let
           pattern = "\${LEAN_BINARY_DIR}/../mimalloc/src/mimalloc";
         in ''
