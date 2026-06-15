@@ -1,0 +1,14 @@
+diff --git a/tests/CMakeLists.txt b/tests/CMakeLists.txt
+index ada3293b2d..e28fcc0942 100644
+--- a/tests/CMakeLists.txt
++++ b/tests/CMakeLists.txt
+@@ -38,8 +38,8 @@ string(APPEND TEST_VARS " LEANC_OPTS='${LEANC_OPTS}'")
+ # LEANC_OPTS in CXX is necessary for macOS c++ to find its headers
+ string(APPEND TEST_VARS " CXX='${CMAKE_CXX_COMPILER} ${LEANC_OPTS}'")
+
+-set(WITH_TEST_ENV "${CMAKE_CURRENT_SOURCE_DIR}/with_stage${STAGE}_test_env.sh")
+-set(WITH_BENCH_ENV "${CMAKE_CURRENT_SOURCE_DIR}/with_stage${STAGE}_bench_env.sh")
++set(WITH_TEST_ENV "${CMAKE_CURRENT_BINARY_DIR}/with_stage${STAGE}_test_env.sh")
++set(WITH_BENCH_ENV "${CMAKE_CURRENT_BINARY_DIR}/with_stage${STAGE}_bench_env.sh")
+
+ configure_file(with_env.sh.in "${WITH_TEST_ENV}")
