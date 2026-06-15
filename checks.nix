@@ -109,6 +109,7 @@
             pkgs,
             ...
           }: {
+            virtualisation.diskSize = 2048;
             networking = {hostName = "hakkero";};
             environment = {
               variables.EDITOR = "vim";
