@@ -406,5 +406,19 @@
       "hash": "sha256-/KhG81iHJKOK0Z7kApLGfLdDjXVVkDNy4zCO73lbpRY=",
       "url": "https://github.com/leanprover/lean4/releases/download/v4.32.0/lean-4.32.0-linux.tar.zst"
     }
+  },
+  "v4.33.0": {
+    "aarch64-darwin": {
+      "hash": "sha256-21J0tmm+JwrwSLXk8eDOVx32dQ5BGVaz4eb8wgEkEMI="
+    },
+    "aarch64-linux": {
+      "hash": "sha256-+WGkF8uhC26gqdE2cS1ZUoE4F//WaABB8JojNSb4A6k="
+    },
+    "x86_64-darwin": {
+      "hash": "sha256-GMSt/S5FOMNmj34HDojHohV23un730beffLvFsl//vM="
+    },
+    "x86_64-linux": {
+      "hash": "sha256-Sz+wPCmh4KJT+x0R+brjcl8ZoNxvwJs+oW0snfM0niw="
+    }
   }
 }
