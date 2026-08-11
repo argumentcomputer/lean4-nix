@@ -1,0 +1,80 @@
+# Bump the templates to the latest stable Lean release, record the release
+# hashes, and open a PR against dev
+name: Update toolchain
+
+on:
+  schedule:
+    # Daily at 00:00 UTC
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    name: Update Lean toolchain
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Mint a token from the GitHub App so the opened PR triggers CI; pushes
+      # made with GITHUB_TOKEN do not. Same App as repo-sync.yml.
+      - uses: actions/create-github-app-token@v3
+        id: app-token
+        with:
+          client-id: ${{ secrets.TOKEN_APP_ID }}
+          private-key: ${{ secrets.TOKEN_APP_PRIVATE_KEY }}
+
+      - uses: cachix/install-nix-action@v31
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      # `pinned-tags` moves every template's `lean-toolchain` to the newest
+      # stable release and the tags its dependencies are pinned to with it;
+      # a dependency that has not tagged the release keeps its pin. Failures
+      # are not gated on here: `silent` on both outcomes leaves the edits in
+      # the working tree, and the PR opened at the end reports them via its
+      # own CI.
+      - uses: argumentcomputer/lean-update@dev
+        id: update
+        with:
+          lake_package_directory: templates/*
+          bump_mode: pinned-tags
+          on_update_succeeds: silent
+          on_update_fails: silent
+          token: ${{ steps.app-token.outputs.token }}
+
+      # The Nix-specific half: lean-update knows nothing about the pinned
+      # release hashes, which cannot be fetched at evaluation time. In
+      # pinned-tags mode an applied update always moves the templates to
+      # exactly the `latest_lean` release.
+      - name: Record the release hashes
+        env:
+          TAG: ${{ steps.update.outputs.latest_lean }}
+        run: |
+          if ! jq -e --arg t "$TAG" 'has($t)' data/toolchains.json > /dev/null; then
+            nix run .#toolchain-fetch -- "${TAG#v}"
+          fi
+
+      # With no changes in the working tree this opens nothing, so the daily
+      # no-op run stays quiet.
+      - name: Open a pull request
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          base: dev
+          branch: update/lean-${{ steps.update.outputs.latest_lean }}
+          delete-branch: true
+          title: "feat(toolchain): Update to ${{ steps.update.outputs.latest_lean }}"
+          commit-message: |
+            feat(toolchain): Update to ${{ steps.update.outputs.latest_lean }}
+
+            Template toolchains and dependency pins bumped by lean-update,
+            hashes recorded by `nix run .#toolchain-fetch`.
+          body: |
+            Bumps the templates to
+            [${{ steps.update.outputs.latest_lean }}](https://github.com/leanprover/lean4/releases/tag/${{ steps.update.outputs.latest_lean }})
+            and records its release hashes in `data/toolchains.json`.
