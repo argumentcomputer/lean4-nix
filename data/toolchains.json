@@ -1,0 +1,410 @@
+{
+  "v4.11.0": {
+    "aarch64-darwin": {
+      "hash": "sha256-wPJ8mjIQcmzz4o0H769oJ6xvrT3ospW2CPq/+poMk8I="
+    },
+    "aarch64-linux": {
+      "hash": "sha256-bdNJtwDzYnkCXkaaT1335ip54fSHm2IvjKAvvJHDQNw="
+    },
+    "x86_64-darwin": {
+      "hash": "sha256-9y4A9P444iCRUa2BJSGOkPM1Wvz7NP+UiXXL9dTEEfA="
+    },
+    "x86_64-linux": {
+      "hash": "sha256-jN60qP0VtKqcs8AN+kjULGA1kAq12ZJ5DkQyQ+PKBds="
+    }
+  },
+  "v4.12.0": {
+    "aarch64-darwin": {
+      "hash": "sha256-7iAQPOMsaB+jOK0fr9hkim42nWTwwlNqlYGyhj7U9/k="
+    },
+    "aarch64-linux": {
+      "hash": "sha256-TrFVqFRM59Te7jWWe04XyzXwD++3cV7uEQ+1DqmiESc="
+    },
+    "x86_64-darwin": {
+      "hash": "sha256-iRg+5fJDkNLeImDoc5+0WHgNaMx8CSmR2tQUAvf7yS8="
+    },
+    "x86_64-linux": {
+      "hash": "sha256-Jln8O/s5VcEY5yc0bE2JR5nGnPu8Ijj21iX9T1rS2Sk="
+    }
+  },
+  "v4.13.0": {
+    "aarch64-darwin": {
+      "hash": "sha256-GsbTeQYuqy+Hdk/iBIMFSulNT4e649w1wHFWbp30uLU="
+    },
+    "aarch64-linux": {
+      "hash": "sha256-FjyKg1pAOfcbT3ficCWX5lT9mQkB/pu3IlLBrJ9jnw4="
+    },
+    "x86_64-darwin": {
+      "hash": "sha256-XRGOt26FfMrUofkR5KHKdmszFiJPzhcOQHa/UsQdU0g="
+    },
+    "x86_64-linux": {
+      "hash": "sha256-RM7qx+5MmNF3v7Sj5cIQVVyH51sIgHto1SMjf+TwmZc="
+    }
+  },
+  "v4.14.0": {
+    "aarch64-darwin": {
+      "hash": "sha256-7Gi4Q+0bryehkIpR2TDjsnLu20zpyJQUt+rHaSuiNZc="
+    },
+    "aarch64-linux": {
+      "hash": "sha256-bOlWzi0rm1BAdbuxDjDKHXdrC7iz0rZ7PCj2ZuoSSuI="
+    },
+    "x86_64-darwin": {
+      "hash": "sha256-GD1wkAuzn3TLqXAC4ZgEGb0m5fR6GbIukxdvEisve30="
+    },
+    "x86_64-linux": {
+      "hash": "sha256-Mg8Y59WCcdlfztdAUitaXtQbhbKvW/Doq5qNvDgORQo="
+    }
+  },
+  "v4.15.0": {
+    "aarch64-darwin": {
+      "hash": "sha256-YVqY+jIjfP4c7Sia89MZR+hSExlHrhhByUgMLr3bZxM="
+    },
+    "aarch64-linux": {
+      "hash": "sha256-QFeUrhvW96/APC8ZPCM8FnwsfGpaBt420DW8r3Zv9iY="
+    },
+    "x86_64-darwin": {
+      "hash": "sha256-bSN0Otu1KdbZvUVKWu3V0eZv5p+A01b57drz401R/IA="
+    },
+    "x86_64-linux": {
+      "hash": "sha256-r3GiVpqfaDN94kNIKbMAjNjjLENunLa9jISiwro1hck="
+    }
+  },
+  "v4.16.0": {
+    "aarch64-darwin": {
+      "hash": "sha256-V2LlrrK6IZCAZYkDZieYfI2R5JxUzGz5C5bt7GUngl0="
+    },
+    "aarch64-linux": {
+      "hash": "sha256-DS+wSI6KXWedOD0chGr/Wm1XsnsOydXZsTliJvIxH4c="
+    },
+    "x86_64-darwin": {
+      "hash": "sha256-CMziTTWw5mbPvTgyYG7Du6eOB/q9NvFdLVda4ZKQ1tQ="
+    },
+    "x86_64-linux": {
+      "hash": "sha256-zdMfEGR4P/8WO+U+KFciEC8Wdn5l5vt/fLHCMlFODDo="
+    }
+  },
+  "v4.17.0": {
+    "aarch64-darwin": {
+      "hash": "sha256-ZvAt+7Z8uBWkbvFqGBnKRoO48VMoT87WHJ2g2J+eV7s="
+    },
+    "aarch64-linux": {
+      "hash": "sha256-CaImhNLSzVNvNyauBZaUV0kYae4K6/v+aF16guxd/q4="
+    },
+    "x86_64-darwin": {
+      "hash": "sha256-o7vKJTRrJTV06DKaCu4+6Xk4OkDy+BM6bfSkekrwvJc="
+    },
+    "x86_64-linux": {
+      "hash": "sha256-XEn77BaTtjI310CCKg9lOSUwZdydHgLl4zuOzewEuMY="
+    }
+  },
+  "v4.18.0": {
+    "aarch64-darwin": {
+      "hash": "sha256-agMaVFparEJnJtnyqpfr5LyQrimDJsIO8dG8gTop8YQ="
+    },
+    "aarch64-linux": {
+      "hash": "sha256-db4ei5CdwZc0GqEwo8GHibPE+Eot1ZNXrKCMx3lqtGk="
+    },
+    "x86_64-darwin": {
+      "hash": "sha256-Bz/1wstpBMWQpDirkAYEdJyYXIbm5ZGJ6A0C5oONAAQ="
+    },
+    "x86_64-linux": {
+      "hash": "sha256-Vncl+DEzt0Sdv8brh7vDHxxN+NA1aH0X8H5GzniieYA="
+    }
+  },
+  "v4.19.0": {
+    "aarch64-darwin": {
+      "hash": "sha256-lNQkb9kKFSpIGUGUmNPkXJQaMWOKV6Co4yVhSUq2zqc="
+    },
+    "aarch64-linux": {
+      "hash": "sha256-8ZE21WvDpdya8h7ciOZCVsGS0/QsPoctvrMOOS160gY="
+    },
+    "x86_64-darwin": {
+      "hash": "sha256-YzK6/+EYAOAGrAl3G2mNNV2Q/TCyfoH/SSStW8q1j5w="
+    },
+    "x86_64-linux": {
+      "hash": "sha256-b+POl6WPROKzVn1FW5lOrOxb/prnd08qVzRESAuoE/4="
+    }
+  },
+  "v4.20.0": {
+    "aarch64-darwin": {
+      "hash": "sha256-G9am9JtTDmKPGP5FYmbC77NMRmmRXSkbfvPcxO4vTyA="
+    },
+    "aarch64-linux": {
+      "hash": "sha256-IixYUFQHDTsm9cgY/5t21BW2oCxiA0ulkdx4DxJ98o0="
+    },
+    "x86_64-darwin": {
+      "hash": "sha256-IWE6B01SziANkNkpzX1ILu2QvGsuqDaclyCW7y9P9Ag="
+    },
+    "x86_64-linux": {
+      "hash": "sha256-87BYQw+H3ZVpx+vSafCvG+ewELdUhJtUPubPnMwI1PA="
+    }
+  },
+  "v4.20.1": {
+    "aarch64-darwin": {
+      "hash": "sha256-/NtNHRHozKVA7cz8AxVJq210zVPEtDZ8WAtK0GXLciE=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.20.1/lean-4.20.0-darwin_aarch64.tar.zst"
+    },
+    "aarch64-linux": {
+      "hash": "sha256-6sdLZsKv1dgf93ujw0UPzDPTc5LziIKG8lYYPQCskQ0=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.20.1/lean-4.20.0-linux_aarch64.tar.zst"
+    },
+    "x86_64-darwin": {
+      "hash": "sha256-iUM13WuDPkRi5CFT3UyBasg7YsxTkDi0q4pO11UjM+A=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.20.1/lean-4.20.0-darwin.tar.zst"
+    },
+    "x86_64-linux": {
+      "hash": "sha256-sqTLdtTmMFP/Z4KV2QdaN3Gpyhy1q4JfBL6s4GHezDs=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.20.1/lean-4.20.0-linux.tar.zst"
+    }
+  },
+  "v4.21.0": {
+    "aarch64-darwin": {
+      "hash": "sha256-49fTHdD9t7/RpLlT4Tsyzv6E3wTflhBv+Krad1OG2os="
+    },
+    "aarch64-linux": {
+      "hash": "sha256-NDLqaxMzqljqD2ST/PxeiPao4TJFjhQ9/pAStcQvAwE="
+    },
+    "x86_64-darwin": {
+      "hash": "sha256-28ikkTuJkmtG8pmKPytjf7ilpvdRGN5/zYTMf/J0vFI="
+    },
+    "x86_64-linux": {
+      "hash": "sha256-RVxt8J1b1U0qUbE3k5xH4t2oFtUSrHicSzZCyb+Yveg="
+    }
+  },
+  "v4.22.0": {
+    "aarch64-darwin": {
+      "hash": "sha256-hLIaeNwtOwiyNRePru5NpcZQ2tWp/K+xIQIqaX1sVuI="
+    },
+    "aarch64-linux": {
+      "hash": "sha256-In50PvEu/s38OTagPiGqK5TjNgJQQRJeADgU22QAHZQ="
+    },
+    "x86_64-darwin": {
+      "hash": "sha256-dkvEKn4N+lr2Qcl+BIqJ+6lNFImv1sPtewE0JhcjrcA="
+    },
+    "x86_64-linux": {
+      "hash": "sha256-hQl6TWWf44gZOl77DEE7iA4QHxKQzEHQDrYIR7GPBk4="
+    }
+  },
+  "v4.23.0": {
+    "aarch64-darwin": {
+      "hash": "sha256-5azyw6ZlID4f+q9EXwwArB0+3/UUAqjMCNPQ1iF1/oI="
+    },
+    "aarch64-linux": {
+      "hash": "sha256-NZyUraVyNE/38V/A5+wylntaXMFODPopRTdyeWkbI1Y="
+    },
+    "x86_64-darwin": {
+      "hash": "sha256-kExa2JYk+cc+A3Y3j0lfIaXsB9LiNElFo9vSnMpVXsU="
+    },
+    "x86_64-linux": {
+      "hash": "sha256-7NAo1vZCthtFHIaHrusk3VN4n7/ct9StuPXPYOsgIro="
+    }
+  },
+  "v4.24.0": {
+    "aarch64-darwin": {
+      "hash": "sha256-F+5VRwLBmfwD83scNwgkVnHJP12TLc/1WgP6bNteWt8="
+    },
+    "aarch64-linux": {
+      "hash": "sha256-I3+O9D+0DRZoGHH7BLLFbwI6/AKlo4d4MdNd1JOCPCM="
+    },
+    "x86_64-darwin": {
+      "hash": "sha256-pe8PsOFGReqg5gvGujmgfn3u7sc9yTznGVuDfrneLJ8="
+    },
+    "x86_64-linux": {
+      "hash": "sha256-sU9eUVkhndGhlWw7gGgTMZ9elMzVvf1W9UUgYJpbtew="
+    }
+  },
+  "v4.25.0": {
+    "aarch64-darwin": {
+      "hash": "sha256-uD4JXe+WtM+BTI5OIiK789ZPVfRIRV4THgZ/H+1JHjA=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.25.0/lean-4.25.0-darwin_aarch64.tar.zst"
+    },
+    "aarch64-linux": {
+      "hash": "sha256-2j6slOyrgHejyo18TpVx24ijA7yFkYzhRfH2Y6JRnus=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.25.0/lean-4.25.0-linux_aarch64.tar.zst"
+    },
+    "x86_64-darwin": {
+      "hash": "sha256-JwZmMTllGvCSgEdlDlm4lMMhQm3AwQg/08lqsDBw/sY=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.25.0/lean-4.25.0-darwin.tar.zst"
+    },
+    "x86_64-linux": {
+      "hash": "sha256-l77nvaZ2ylT0sc6+MjJCoIMj11E0/s0boxzuTbZqu4o=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.25.0/lean-4.25.0-linux.tar.zst"
+    }
+  },
+  "v4.25.1": {
+    "aarch64-darwin": {
+      "hash": "sha256-c7DwiFX862sOiI1kr6kWdap5qk55djnCwEaD1CshLLs=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.25.1/lean-4.25.0-darwin_aarch64.tar.zst"
+    },
+    "aarch64-linux": {
+      "hash": "sha256-W+tKHG0kB+KcQUHgx5HFq5nGwkDmbxPEOqhusweQ6nA=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.25.1/lean-4.25.0-linux_aarch64.tar.zst"
+    },
+    "x86_64-darwin": {
+      "hash": "sha256-0sqzIoURx4SBgbcrnhzxDcvu4FComxPDTNI6/qI/dDg=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.25.1/lean-4.25.0-darwin.tar.zst"
+    },
+    "x86_64-linux": {
+      "hash": "sha256-oz1h8q7JuPzjOtNziUF7X59OdX/eadk5bs3xYZNlGmo=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.25.1/lean-4.25.0-linux.tar.zst"
+    }
+  },
+  "v4.25.2": {
+    "aarch64-darwin": {
+      "hash": "sha256-+fUNe/xCYCl4ipRisMAa7bRiwl9iP6qPy+6e8SgacPs="
+    },
+    "aarch64-linux": {
+      "hash": "sha256-jbxyTg/5FcgmPBdOtoNdVOUyG0ukVDN7AmihIINuBd4="
+    },
+    "x86_64-darwin": {
+      "hash": "sha256-B/JaT9Kz19kSVtM60+tcf+pyBMLLyjHAjjzwGC59cEo="
+    },
+    "x86_64-linux": {
+      "hash": "sha256-QdX5ANqlFnwIvWGF5taa+DlD7TWDot7ETyv+dEG1bNs="
+    }
+  },
+  "v4.26.0": {
+    "aarch64-darwin": {
+      "hash": "sha256-nsmYcAg2SOMRZJ5K3EWFRWvl0JXN5kwFwYHTV05BT74=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.26.0/lean-4.26.0-darwin_aarch64.tar.zst"
+    },
+    "aarch64-linux": {
+      "hash": "sha256-vzHFNnOjLOrI07uQNzYXQ5sj7IChbtpwyyQ9LchAh8E=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.26.0/lean-4.26.0-linux_aarch64.tar.zst"
+    },
+    "x86_64-darwin": {
+      "hash": "sha256-N5HhO7Y8+kO4QF60GMd7FisPx0+2Dv5rW/151I+4nO0=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.26.0/lean-4.26.0-darwin.tar.zst"
+    },
+    "x86_64-linux": {
+      "hash": "sha256-hzwlKxxrE5LlcgrY1aE3qrvnLJ+WqTD9taHdHdxdpFQ=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.26.0/lean-4.26.0-linux.tar.zst"
+    }
+  },
+  "v4.27.0": {
+    "aarch64-darwin": {
+      "hash": "sha256-AefZEwRkvH2Ee67OB9+yxPSN0C5xtLmnfUhJFOpZTvs=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.27.0/lean-4.27.0-darwin_aarch64.tar.zst"
+    },
+    "aarch64-linux": {
+      "hash": "sha256-slbuwna6qszD6z+mTXzP9k9xC3yqB08wW6leABOtMec=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.27.0/lean-4.27.0-linux_aarch64.tar.zst"
+    },
+    "x86_64-darwin": {
+      "hash": "sha256-5MpUHYaIHDVJfLbmwaITWPA6Syz7Lo1OFOWNwqCoBa4=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.27.0/lean-4.27.0-darwin.tar.zst"
+    },
+    "x86_64-linux": {
+      "hash": "sha256-BW4tyFZPwGSoAeafPrGMBEubVGvIsOWiwAJH+KHLjOY=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.27.0/lean-4.27.0-linux.tar.zst"
+    }
+  },
+  "v4.28.0": {
+    "aarch64-darwin": {
+      "hash": "sha256-YZQvnRkH25GAIBVKUXyH+2SEHkjOuwAy/AkJ340YmgU=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.28.0/lean-4.28.0-darwin_aarch64.tar.zst"
+    },
+    "aarch64-linux": {
+      "hash": "sha256-yGWAEmHHR9TxXQi+ypq8IKypB5BKu7KE3iWjf0tFWLw=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.28.0/lean-4.28.0-linux_aarch64.tar.zst"
+    },
+    "x86_64-darwin": {
+      "hash": "sha256-TJfaEKkm2Qat8z/JmKJUakED6gzfmVzs78G6ox/twAg=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.28.0/lean-4.28.0-darwin.tar.zst"
+    },
+    "x86_64-linux": {
+      "hash": "sha256-zrOj+ET3rr9jJF4rUcKNWw7TiULBn5PPP+vVIDAhYL0=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.28.0/lean-4.28.0-linux.tar.zst"
+    }
+  },
+  "v4.29.0": {
+    "aarch64-darwin": {
+      "hash": "sha256-dDCbjyMS8OhgjgKB/UewjSE7zVPzwgmfzRDOOhpG8Mg=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.29.0/lean-4.29.0-darwin_aarch64.tar.zst"
+    },
+    "aarch64-linux": {
+      "hash": "sha256-N5BHyBNnqfBYoPNrNXQHO0wQ8MoSbdAj6YUFNjDwC3c=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.29.0/lean-4.29.0-linux_aarch64.tar.zst"
+    },
+    "x86_64-darwin": {
+      "hash": "sha256-/6y9ZMYLzJBY42kL4/93fZMloIx5XLuyduUPq10GYRo=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.29.0/lean-4.29.0-darwin.tar.zst"
+    },
+    "x86_64-linux": {
+      "hash": "sha256-CJ9+UT7T6UNtGR9JhjMMC1OAnIa1mX9et/JVUMN0+kg=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.29.0/lean-4.29.0-linux.tar.zst"
+    }
+  },
+  "v4.29.1": {
+    "aarch64-darwin": {
+      "hash": "sha256-c7zLOSyn2Ks9YqHjKLt9BXgV8Ijb2/tldPGUrlBXl68=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.29.1/lean-4.29.1-darwin_aarch64.tar.zst"
+    },
+    "aarch64-linux": {
+      "hash": "sha256-HM37f5JJAfS3OktOsWnls9x09oNlIbR+cz6iXyq/wNw=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.29.1/lean-4.29.1-linux_aarch64.tar.zst"
+    },
+    "x86_64-darwin": {
+      "hash": "sha256-NYWrNNIMU8+RUWmqXA0u+9mZOni53AhRZkFRDu8I+rA=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.29.1/lean-4.29.1-darwin.tar.zst"
+    },
+    "x86_64-linux": {
+      "hash": "sha256-vwYtKVVtZVaF+yh1Y8JJrWqP3jQ1LBi14yVopZXBrsE=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.29.1/lean-4.29.1-linux.tar.zst"
+    }
+  },
+  "v4.30.0": {
+    "aarch64-darwin": {
+      "hash": "sha256-By3KSjj7wNPO25b+qIbMJDtCTyvRYkdZYgC5qauT8PU=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.30.0/lean-4.30.0-darwin_aarch64.tar.zst"
+    },
+    "aarch64-linux": {
+      "hash": "sha256-yZxvDt1EaVbUdYxZ1Dg+jmQR/2zHGgH5yqvl66RUEh0=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.30.0/lean-4.30.0-linux_aarch64.tar.zst"
+    },
+    "x86_64-darwin": {
+      "hash": "sha256-s43YoltbUJbGyQGef/rdvZGiP8tTgnUyJeMxRRV2jKI=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.30.0/lean-4.30.0-darwin.tar.zst"
+    },
+    "x86_64-linux": {
+      "hash": "sha256-Ta10FBwsEZyhqmJmVr6DuOFCOK+6lycf178es/CBsxk=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.30.0/lean-4.30.0-linux.tar.zst"
+    }
+  },
+  "v4.31.0": {
+    "aarch64-darwin": {
+      "hash": "sha256-JkEFUAyKvfN7aP/gM5Cng+0lmAeAciJpjajdktbOCic=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.31.0/lean-4.31.0-darwin_aarch64.tar.zst"
+    },
+    "aarch64-linux": {
+      "hash": "sha256-sb8dPFhrds9KhiEqWV2Lnt2Z9DikHM6F1XgPqTR8gRs=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.31.0/lean-4.31.0-linux_aarch64.tar.zst"
+    },
+    "x86_64-darwin": {
+      "hash": "sha256-bax6j51tC8M5tOqTdsBqiPP9Gn9GK+s8fe2fvJNPP7U=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.31.0/lean-4.31.0-darwin.tar.zst"
+    },
+    "x86_64-linux": {
+      "hash": "sha256-B6YzzI2RUcvAiCXqTN2lDUsCosnLhSwBMbEwRvScrX8=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.31.0/lean-4.31.0-linux.tar.zst"
+    }
+  },
+  "v4.32.0": {
+    "aarch64-darwin": {
+      "hash": "sha256-T6pHV/fKXn2ViKned5VQ+li98BSY7blm8VAp4uoRfk4=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.32.0/lean-4.32.0-darwin_aarch64.tar.zst"
+    },
+    "aarch64-linux": {
+      "hash": "sha256-5etn5fMMFNV+cL98oq2ICwmlLXXaHPXi3quyQYqEyNE=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.32.0/lean-4.32.0-linux_aarch64.tar.zst"
+    },
+    "x86_64-darwin": {
+      "hash": "sha256-m0icke4QfFt2u4DHJXMfTTcNhQlMU7tFYVUX+xmnOmo=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.32.0/lean-4.32.0-darwin.tar.zst"
+    },
+    "x86_64-linux": {
+      "hash": "sha256-/KhG81iHJKOK0Z7kApLGfLdDjXVVkDNy4zCO73lbpRY=",
+      "url": "https://github.com/leanprover/lean4/releases/download/v4.32.0/lean-4.32.0-linux.tar.zst"
+    }
+  }
+}

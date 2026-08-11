@@ -1,6 +1,9 @@
-.*
-!.gitignore
-!.pre-commit-config.yaml
-
+# Nix build symlinks
 **/result
+**/result-*
+
+# Lake build artifacts
+**/.lake
+
+# Generated against the local checkout when testing templates
 templates/**/flake.lock

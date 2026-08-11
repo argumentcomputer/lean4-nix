@@ -1,169 +1,110 @@
 {
-  pkgs-bin,
-  lake2nix-bin,
   pkgs,
-}: let
-  inherit (pkgs-bin) lib;
-  # batteries v4.31.0 cannot be built as a Lake dependency due to an upstream
-  # import cycle between its libraries, so the checks depending on it are
-  # skipped. See the note in manifests/v4.31.0.nix.
-  batteries-broken =
-    lib.hasSuffix "v4.31.0"
-    (lib.fileContents ./templates/minimal/lean-toolchain);
-  generate-lake-tests = {
-    prefix ? "",
-    lean,
-    lake,
-  }: let
-    minimal-direct = lean.buildLeanPackage {
-      name = "Example";
-      roots = ["Main"];
-      src = lib.cleanSource ./templates/minimal;
-    };
-    minimal-manifest = lake.mkPackage {
-      name = "minimal";
-      src = lib.cleanSource ./templates/minimal;
-    };
-    dependency-deps = lake.buildDeps {
-      src = lib.cleanSource ./templates/dependency;
-    };
-    dependency-manifest = lake.mkPackage {
-      name = "Example";
-      src = lib.cleanSource ./templates/dependency;
-      lakeDeps = dependency-deps;
-      buildLibrary = true;
-    };
-    incremental-deps = lake.buildDeps {
-      src = lib.cleanSource ./templates/incremental;
-    };
-    incremental-args = {
-      lakeDeps = incremental-deps;
-      src = lib.cleanSource ./templates/incremental;
-    };
-    incremental-lib = lake.mkPackage (incremental-args
-      // {
-        name = "Incremental";
-        buildLibrary = true;
-      });
-    incremental-test = lake.mkPackage (incremental-args
-      // {
-        name = "IncrementalTest";
-        lakeArtifacts = incremental-lib;
-        installArtifacts = false;
-      });
-    # Import `dependency` into `incremental` to test the `.lake` behavior for `lakefile.lean` dependencies
-    incremental-test-dep = let
-      all-deps = dependency-deps // {Example = dependency-manifest;};
-      # Override package-overrides.json to include all deps (incremental + dependency)
-      overridesJson = pkgs.writers.writeJSON "package-overrides.json" {
-        version = "1.1.0";
-        packagesDir = ".lake/packages";
-        packages = map (name: {
-          inherit name;
-          inherited = false;
-          type = "path";
-          dir = ".lake/packages/${name}";
-        }) (builtins.attrNames all-deps);
-        name = "Incremental";
-        lakeDir = ".lake";
-      };
-    in
-      lake.mkPackage {
-        name = "IncrementalTest";
-        src = lib.cleanSource ./templates/incremental;
-        lakeDeps = all-deps;
-        prePatch = ''
-          substituteInPlace lakefile.lean --replace-fail "package Incremental" 'require Example from "${dependency-manifest}"
+  lean,
+  lake2nix,
+  overlayPkgs,
+}:
+let
+  srcOf = name: lake2nix.cleanLakeSource (./templates + "/${name}");
 
-          package Incremental'
-          substituteInPlace Incremental.lean --replace-fail "import Batteries" 'import Batteries
-          import Example'
-          substituteInPlace IncrementalTest.lean --replace-fail "IO.println greeting" "IO.println cirno"
-        '';
-        preConfigure = ''
-          mkdir -p .lake
-          ln -s ${overridesJson} .lake/package-overrides.json
-        '';
-        installArtifacts = false;
-      };
-    lake-tests = rec {
-      minimal-direct-lib = minimal-direct.sharedLib;
-      minimal-direct-bin = minimal-direct.executable;
-      minimal-manifest-bin = minimal-manifest;
-      minimal-exec = pkgs.testers.testEqualContents {
-        assertion = "Call minimal";
-        expected = pkgs.writeTextFile {
-          name = "expected";
-          text = "Da";
-        };
-        actual =
-          pkgs.runCommand "actual"
-          {}
-          ''
-            ${minimal-direct-bin}/bin/example | head -c 2 > $out
-          '';
-      };
-      # Ensure the built executables can actually run on a VM
-      minimal-exec-vm = pkgs.testers.runNixOSTest ({pkgs, ...}: {
-        name = "Execute Lean Package";
+  minimalPkg = lake2nix.mkPackage {
+    name = "minimal";
+    src = srcOf "minimal";
+  };
 
-        nodes = {
-          server = {
-            config,
-            pkgs,
-            ...
-          }: {
-            virtualisation.diskSize = 2048;
-            virtualisation.memorySize = 4096;
-            networking = {hostName = "hakkero";};
-            environment = {
-              variables.EDITOR = "vim";
-              systemPackages = [
-                pkgs.lean
-                minimal-direct-bin
-              ];
-            };
-          };
-        };
+  dependencyDeps = lake2nix.buildDeps { src = srcOf "dependency"; };
+  dependencyPkg = lake2nix.mkPackage {
+    name = "Example";
+    src = srcOf "dependency";
+    lakeDeps = dependencyDeps;
+    buildLibrary = true;
+  };
 
-        testScript = ''
-          hakkero.start()
-          hakkero.succeed("example")
-        '';
-      });
-    };
-  in
-    lib.mapAttrs' (name: value: lib.nameValuePair "${prefix}${name}" value)
-    (lake-tests
-      // lib.optionalAttrs (!batteries-broken) {
-        inherit dependency-manifest incremental-lib incremental-test incremental-test-dep;
-      });
-  lake2nix = pkgs.callPackage lib/lake.nix {};
+  incrementalDeps = lake2nix.buildDeps { src = srcOf "incremental"; };
+  incrementalLib = lake2nix.mkPackage {
+    name = "Incremental";
+    src = srcOf "incremental";
+    lakeDeps = incrementalDeps;
+    buildLibrary = true;
+  };
+  incrementalTest = lake2nix.mkPackage {
+    name = "IncrementalTest";
+    src = srcOf "incremental";
+    lakeDeps = incrementalDeps;
+    lakeArtifacts = incrementalLib;
+    installArtifacts = false;
+  };
+
+  # `dependency` is required from `incremental` by path, which is how Lake sees
+  # a `lakefile.lean` dependency in a consumer workspace. Lake re-elaborates
+  # such configs, so this exercises the writable `.lake` copies that
+  # `mkLakeDerivation` sets up.
+  crossDeps = dependencyDeps // {
+    Example = dependencyPkg;
+  };
+  crossOverrides = pkgs.writers.writeJSON "package-overrides.json" {
+    version = "1.1.0";
+    packagesDir = ".lake/packages";
+    packages = map (name: {
+      inherit name;
+      inherited = false;
+      type = "path";
+      dir = ".lake/packages/${name}";
+    }) (builtins.attrNames crossDeps);
+    name = "Incremental";
+    lakeDir = ".lake";
+  };
+  crossPkg = lake2nix.mkPackage {
+    name = "IncrementalTest";
+    src = srcOf "incremental";
+    lakeDeps = crossDeps;
+    installArtifacts = false;
+    prePatch = ''
+      substituteInPlace lakefile.lean --replace-fail "package Incremental" 'require Example from "${dependencyPkg}"
+
+      package Incremental'
+      substituteInPlace Incremental.lean --replace-fail "import Batteries" 'import Batteries
+      import Example'
+      substituteInPlace IncrementalTest.lean --replace-fail "IO.println greeting" "IO.println cirno"
+    '';
+    preConfigure = ''
+      mkdir -p .lake
+      ln -s ${crossOverrides} .lake/package-overrides.json
+    '';
+  };
 in
-  {
-    lean-bin = pkgs-bin.lean;
-    leanc-bin = pkgs-bin.lean.leanc;
-    lean = pkgs.lean;
-    leanc = pkgs.lean.leanc;
-    # Tests that the executable can run.
-    lean-bin-run = pkgs-bin.testers.testVersion {package = pkgs-bin.lean;};
+{
+  # The toolchain builds, runs, and reports its version.
+  toolchain = pkgs.testers.testVersion { package = lean; };
 
-    cadical =
-      pkgs.runCommand "bv-decide" {
-        nativeBuildInputs = [pkgs.cadical];
-      } ''
-        set -euo pipefail
-        ${pkgs.lean.lean-all}/bin/lean ${./test/bv-decide.lean}
-        touch $out
-      '';
-  }
-  // (generate-lake-tests {
-    lake = lake2nix-bin;
-    lean = pkgs-bin.lean;
-    prefix = "bin-";
-  })
-  // (generate-lake-tests {
-    lake = lake2nix;
-    lean = pkgs.lean;
-    prefix = "src-";
-  })
+  # `bv-decide` shells out to `cadical`. Deliberately no `nativeBuildInputs`:
+  # this asserts the toolchain supplies it.
+  bv-decide = pkgs.runCommand "bv-decide" { } ''
+    ${lean}/bin/lean ${./test/bv-decide.lean}
+    touch $out
+  '';
+
+  # Going through the overlay must yield the same toolchain as `lib.${system}`.
+  overlay = overlayPkgs.lean4-nix.fromToolchainFile ./templates/minimal/lean-toolchain;
+
+  # A Lake executable builds and prints what it should.
+  minimal = pkgs.testers.testEqualContents {
+    assertion = "Call minimal";
+    expected = pkgs.writeTextFile {
+      name = "expected";
+      text = "Da";
+    };
+    actual = pkgs.runCommand "actual" { } ''
+      ${minimalPkg}/bin/minimal | head -c 2 > $out
+    '';
+  };
+
+  # Dependencies resolved and built from `lake-manifest.json`.
+  dependency = dependencyPkg;
+
+  # A test target reusing the library target's `.lake` artifacts.
+  incremental = incrementalTest;
+
+  # A `lakefile.lean` dependency imported into another package.
+  incremental-dep = crossPkg;
+}

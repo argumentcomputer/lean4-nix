@@ -3,50 +3,66 @@
   lib,
   stdenv,
   lean,
-}: let
-  capitalize = s: let
-    first = lib.toUpper (builtins.substring 0 1 s);
-    rest = builtins.substring 1 (-1) s;
-  in
+}:
+let
+  capitalize =
+    s:
+    let
+      first = lib.toUpper (builtins.substring 0 1 s);
+      rest = builtins.substring 1 (-1) s;
+    in
     first + rest;
-  importLakeManifest = manifestFile: let
-    manifest = lib.importJSON manifestFile;
-  in
-    lib.warnIf (manifest.version != "1.1.0" && manifest.version != "1.2.0") ("Unknown version: " + builtins.toString manifest.version) manifest;
+  importLakeManifest =
+    manifestFile:
+    let
+      manifest = lib.importJSON manifestFile;
+    in
+    lib.warnIf (manifest.version != "1.1.0" && manifest.version != "1.2.0") (
+      "Unknown version: " + builtins.toString manifest.version
+    ) manifest;
   # An internal wrapper around `mkDerivation` which sets up the lake manifest and runs `lake build`. End users should call `buildDeps` and `mkPackage` instead
-  mkLakeDerivation = args @ {
-    # Name of the build target used to build shared and static facets. When building with `mkPackage` this is not used as the `buildPhase` is overriden
-    name,
-    # Path to the source
-    src,
-    # Attr set of the Lake package's dependency derivations
-    deps ? {},
-    # Whether to build `shared` and `static` facets of a library target.
-    buildLibrary ? false,
-    # Whether to export `.lake` artifacts and source for incremental builds
-    installArtifacts ? true,
-    ...
-  }: let
-    manifest = importLakeManifest "${src}/lake-manifest.json";
-    # Creates a surrogate manifest with paths to local shadow directories.
-    # These shadow directories symlink source files from the Nix store.
-    replaceManifest = (
-      lib.setAttr manifest "packages" (builtins.map ({
-          name,
-          inherited ? false,
-          ...
-        }: {
-          inherit name inherited;
-          type = "path";
-          dir = ".lake/packages/${name}";
-        })
-        manifest.packages)
-    );
-    replaceManifestJson = pkgs.writers.writeJSON "lake-manifest.json" replaceManifest;
-  in
+  mkLakeDerivation =
+    args@{
+      # Name of the build target used to build shared and static facets. When building with `mkPackage` this is not used as the `buildPhase` is overriden
+      name,
+      # Path to the source
+      src,
+      # Attr set of the Lake package's dependency derivations
+      deps ? { },
+      # Whether to build `shared` and `static` facets of a library target.
+      buildLibrary ? false,
+      # Whether to export `.lake` artifacts and source for incremental builds
+      installArtifacts ? true,
+      ...
+    }:
+    let
+      manifest = importLakeManifest "${src}/lake-manifest.json";
+      # Creates a surrogate manifest with paths to local shadow directories.
+      # These shadow directories symlink source files from the Nix store.
+      replaceManifest = (
+        lib.setAttr manifest "packages" (
+          builtins.map (
+            {
+              name,
+              inherited ? false,
+              ...
+            }:
+            {
+              inherit name inherited;
+              type = "path";
+              dir = ".lake/packages/${name}";
+            }
+          ) manifest.packages
+        )
+      );
+      replaceManifestJson = pkgs.writers.writeJSON "lake-manifest.json" replaceManifest;
+    in
     stdenv.mkDerivation (
       {
-        buildInputs = [pkgs.rsync lean.lean-all];
+        buildInputs = [
+          pkgs.rsync
+          lean
+        ];
 
         # Creates shadow directories for dependencies: source files are symlinked
         # from the Nix store. For `lakefile.lean` deps (detected by `.lake/config`
@@ -55,15 +71,16 @@
         configurePhase = ''
           runHook preConfigure
           mkdir -p .lake/packages
-          ${lib.concatStringsSep "\n" (lib.mapAttrsToList (depName: depPath: ''
+          ${lib.concatStringsSep "\n" (
+            lib.mapAttrsToList (depName: depPath: ''
               cp -rs "${depPath}" ".lake/packages/${depName}"
               if [ -d "${depPath}/.lake/config" ]; then
                 chmod -R +w ".lake/packages/${depName}/.lake"
                 rm -rf ".lake/packages/${depName}/.lake"/*
                 cp -rP --no-preserve=mode "${depPath}/.lake"/* ".lake/packages/${depName}/.lake/"
               fi
-            '')
-            deps)}
+            '') deps
+          )}
           if [ ! -e .lake/package-overrides.json ]; then
             ln -s ${replaceManifestJson} .lake/package-overrides.json
           fi
@@ -96,70 +113,79 @@
         '';
       }
       # Prevents implicit arguments from being coerced to input strings in `mkDerivation`
-      // (builtins.removeAttrs args ["deps" "depOverride" "depOverrideDeriv" "lakeDeps" "lakeArtifacts"])
+      // (builtins.removeAttrs args [
+        "deps"
+        "depOverride"
+        "depOverrideDeriv"
+        "lakeDeps"
+        "lakeArtifacts"
+      ])
     );
 
   # Builds only the dependencies of a Lake package based on its `lake-manifest.json` file. Returns an attr set of package derivations
-  buildDeps = {
-    # Path to the source
-    src,
-    # Path to the `lake-manifest.json` file
-    manifestFile ? "${src}/lake-manifest.json",
-    # Override derivation args in dependencies
-    depOverride ? {},
-    # Override derivation entirely in dependencies
-    depOverrideDeriv ? {},
-    ...
-  }: let
-    manifest = importLakeManifest manifestFile;
+  buildDeps =
+    {
+      # Path to the source
+      src,
+      # Path to the `lake-manifest.json` file
+      manifestFile ? "${src}/lake-manifest.json",
+      # Override derivation args in dependencies
+      depOverride ? { },
+      # Override derivation entirely in dependencies
+      depOverrideDeriv ? { },
+      ...
+    }:
+    let
+      manifest = importLakeManifest manifestFile;
 
-    # Fetches the Git source of each dependency in the manifest, accounting for subDir
-    depSources = builtins.listToAttrs (builtins.map (info: {
-        inherit (info) name;
-        value = let
-          repo = builtins.fetchGit {
-            inherit (info) url rev;
-            shallow = true;
-          };
-          subDir = info.subDir or null;
-        in
-          if subDir != null
-          then "${repo}/${subDir}"
-          else repo;
-      })
-      manifest.packages);
+      # Fetches the Git source of each dependency in the manifest, accounting for subDir
+      depSources = builtins.listToAttrs (
+        builtins.map (info: {
+          inherit (info) name;
+          value =
+            let
+              repo = builtins.fetchGit {
+                inherit (info) url rev;
+                shallow = true;
+              };
+              subDir = info.subDir or null;
+            in
+            if subDir != null then "${repo}/${subDir}" else repo;
+        }) manifest.packages
+      );
 
-    # Constructs dependency name map
-    flatDeps =
-      lib.mapAttrs (
-        _name: src: let
+      # Constructs dependency name map
+      flatDeps = lib.mapAttrs (
+        _name: src:
+        let
           manifest = importLakeManifest "${src}/lake-manifest.json";
-          deps = builtins.map ({name, ...}: name) manifest.packages;
+          deps = builtins.map ({ name, ... }: name) manifest.packages;
         in
-          deps
-      )
-      depSources;
+        deps
+      ) depSources;
 
-    # Builds all dependencies, overriding with any custom arguments from `depOverride` or pre-built derivations from `depOverrideDeriv`
-    manifestDeps = builtins.listToAttrs (builtins.map (info: {
-        inherit (info) name;
-        value =
-          depOverrideDeriv.${
-            info.name
-          } or (mkLakeDerivation ({
-              inherit (info) name url;
-              src = depSources.${info.name};
-              deps = builtins.listToAttrs (builtins.map (name: {
-                  inherit name;
-                  value = manifestDeps.${name};
-                })
-                flatDeps.${info.name});
-              buildLibrary = true;
-            }
-            // (depOverride.${info.name} or {})));
-      })
-      manifest.packages);
-  in
+      # Builds all dependencies, overriding with any custom arguments from `depOverride` or pre-built derivations from `depOverrideDeriv`
+      manifestDeps = builtins.listToAttrs (
+        builtins.map (info: {
+          inherit (info) name;
+          value =
+            depOverrideDeriv.${info.name} or (mkLakeDerivation (
+              {
+                inherit (info) name url;
+                src = depSources.${info.name};
+                deps = builtins.listToAttrs (
+                  builtins.map (name: {
+                    inherit name;
+                    value = manifestDeps.${name};
+                  }) flatDeps.${info.name}
+                );
+                buildLibrary = true;
+              }
+              // (depOverride.${info.name} or { })
+            ));
+        }) manifest.packages
+      );
+    in
     manifestDeps;
 
   # Builds a given target of a Lake package with `lake build`, building any dependencies first and importing them via their Nix store paths
@@ -169,18 +195,21 @@
   # - `lakeArtifacts` takes a derivation from a previous `mkPackage` invocation and copies the `.lake` directory to the current build directory. Useful for incremental builds, e.g. reusing a package's library target artifacts when building an executable or test target.
   # - `depOverride` and `depOverrideDeriv` can also be passed through as args to `buildDeps`, but are overriden by `lakeDeps` if specified
   # Any input phases and hooks will be passed through to `mkDerivation`
-  mkPackage = args @ {
-    # Name of the build target, must be defined in `lakefile.lean`
-    name,
-    # Path to the source
-    src,
-    # Static library dependencies, passed as `nativeBuildInputs` to `mkDerivation`
-    staticLibDeps ? [],
-    ...
-  }: let
-    deps = args.lakeDeps or (buildDeps (builtins.removeAttrs args ["name"]));
-  in
-    mkLakeDerivation (args
+  mkPackage =
+    args@{
+      # Name of the build target, must be defined in `lakefile.lean`
+      name,
+      # Path to the source
+      src,
+      # Static library dependencies, passed as `nativeBuildInputs` to `mkDerivation`
+      staticLibDeps ? [ ],
+      ...
+    }:
+    let
+      deps = args.lakeDeps or (buildDeps (builtins.removeAttrs args [ "name" ]));
+    in
+    mkLakeDerivation (
+      args
       // {
         inherit name src deps;
         nativeBuildInputs = staticLibDeps;
@@ -189,14 +218,14 @@
         # https://github.com/ipetkov/crane/blob/master/lib/setupHooks/inheritCargoArtifactsHook.sh#L28
         # Copies any given Lake artifacts to the build directory
         prePatch =
-          args.prePatch or
-            (
-            if args ? lakeArtifacts
-            then ''
-              cp -R ${args.lakeArtifacts.outPath}/.lake .
-              chmod -R +w .lake
-            ''
-            else ""
+          args.prePatch or (
+            if args ? lakeArtifacts then
+              ''
+                cp -R ${args.lakeArtifacts.outPath}/.lake .
+                chmod -R +w .lake
+              ''
+            else
+              ""
           );
 
         # Copies any executable to the out path, as well as the source and `.lake` artifacts if specified
@@ -206,7 +235,59 @@
               cp -R .lake/build/bin $out
             fi
           '';
-      });
-in {
-  inherit mkLakeDerivation buildDeps mkPackage;
+      }
+    );
+  # Predicate form, for callers who need to union extra files into the source:
+  #
+  #   lib.cleanSourceWith {
+  #     src = ./.;
+  #     filter = path: type: filterLakeSources path type || myOwnFilter path type;
+  #   }
+  filterLakeSources =
+    orig_path: type:
+    let
+      base = baseNameOf (toString orig_path);
+      matchesSuffix = lib.any (suffix: lib.hasSuffix suffix base) [
+        # Lean sources, including `lakefile.lean`
+        ".lean"
+        # `lakefile.toml`, and config for other Lake-adjacent tools
+        ".toml"
+        # `extern_lib` targets and FFI shims are compiled during `lake build`
+        ".c"
+        ".cpp"
+        ".h"
+        ".hpp"
+      ];
+      isLakeFile = lib.elem base [
+        "lake-manifest.json"
+        "lean-toolchain"
+      ];
+      # A developer's local build directory must never reach the store: the
+      # build creates its own `.lake`, and stale artifacts would collide with
+      # the dependency shadow directories set up in `configurePhase`.
+      isBuildDir = base == ".lake";
+    in
+    !isBuildDir && (type == "directory" || matchesSuffix || isLakeFile);
+
+  # Restrict a source tree to the files `lake build` actually reads, so that
+  # editing unrelated files (flake.nix, CI config, docs) does not invalidate the
+  # build. The analogue of crane's `cleanCargoSource`.
+  cleanLakeSource =
+    src:
+    lib.cleanSourceWith {
+      src = lib.cleanSource src;
+      filter = filterLakeSources;
+      # A fixed name keeps the store path stable regardless of what the
+      # checkout directory happens to be called.
+      name = "lake-source";
+    };
+in
+{
+  inherit
+    mkLakeDerivation
+    buildDeps
+    mkPackage
+    cleanLakeSource
+    filterLakeSources
+    ;
 }
