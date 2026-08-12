@@ -30,14 +30,16 @@
         let
           lean = lean4-nix.lib.${system}.fromToolchainFile ./lean-toolchain;
           lake2nix = pkgs.callPackage lean4-nix.lake { inherit lean; };
+          # Restrict the build inputs to the files `lake build` reads, so edits
+          # to the flake or docs don't invalidate the build.
+          src = lake2nix.cleanLakeSource ./.;
           # Build all dependencies from `lake-manifest.json`
           lakeDeps = lake2nix.buildDeps {
-            src = ./.;
+            inherit src;
           };
           # Arguments shared by all build targets
           commonArgs = {
-            inherit lakeDeps;
-            src = ./.;
+            inherit lakeDeps src;
           };
           incLib = lake2nix.mkPackage (
             commonArgs

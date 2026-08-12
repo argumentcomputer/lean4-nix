@@ -34,7 +34,7 @@
         {
           packages.default = lake2nix.mkPackage {
             name = "minimal";
-            src = pkgs.lib.cleanSource ./.;
+            src = lake2nix.cleanLakeSource ./.;
           };
 
           devShells.default = pkgs.mkShell {
