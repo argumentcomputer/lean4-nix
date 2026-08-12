@@ -59,9 +59,20 @@ jobs:
             nix run .#toolchain-fetch -- "${TAG#v}"
           fi
 
+      # An open PR for this release is left untouched: it may carry review
+      # fixes, and create-pull-request would force-push them away.
+      - name: Check for an open update PR
+        id: existing-pr
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          TAG: ${{ steps.update.outputs.latest_lean }}
+        run: |
+          echo "open=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "update/lean-$TAG" --state open --json number --jq length)" | tee -a "$GITHUB_OUTPUT"
+
       # With no changes in the working tree this opens nothing, so the daily
       # no-op run stays quiet.
       - name: Open a pull request
+        if: steps.existing-pr.outputs.open == '0'
         uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ steps.app-token.outputs.token }}
