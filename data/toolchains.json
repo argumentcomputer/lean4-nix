@@ -434,5 +434,19 @@
     "x86_64-linux": {
       "hash": "sha256-iQr9GFNw+FZmAluIORSrT0szkTb4yWFntpz7Yq7K8jU="
     }
+  },
+  "v4.34.0": {
+    "aarch64-darwin": {
+      "hash": "sha256-afJj+m4hu8JGa7+xr/zZJHnuJxTIg6B95UjgmaWSKTI="
+    },
+    "aarch64-linux": {
+      "hash": "sha256-QLBP23+4SdPIDhDDu+68e3NUttPwdFC5FowhSbQNKoI="
+    },
+    "x86_64-darwin": {
+      "hash": "sha256-6Qr+hMCiqjWD8+zQjlH7fu67hNNvmbfKxdPAZ/qGQLA="
+    },
+    "x86_64-linux": {
+      "hash": "sha256-yqqYNWCYyF3A/LvSjh7GbznrZVGCmXK3Uv8g4ShrZGs="
+    }
   }
 }
