@@ -6,19 +6,19 @@ on:
   - cron:  "0 0 * * *"
   workflow_dispatch:
 
-# The sync authenticates with a GitHub App installation token, so the job needs
-# nothing from `secrets.GITHUB_TOKEN`.
 permissions: {}
 
 jobs:
   repo-sync:
     name: Sync upstream changes
-    uses: argumentcomputer/ci-workflows/.github/workflows/repo-sync.yml@main
-    with:
-      repository: lenianiva/lean4-nix
-      # This fork's default branch is `dev`; `main` is kept as a plain mirror
-      # of upstream, so both sides of the sync share the branch name.
-      branch: main
-    secrets:
-      TOKEN_APP_ID: ${{ secrets.TOKEN_APP_ID }}
-      TOKEN_APP_PRIVATE_KEY: ${{ secrets.TOKEN_APP_PRIVATE_KEY }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+    steps:
+      - uses: argumentcomputer/ci-workflows/.github/actions/repo-sync@main
+        with:
+          repository: lenianiva/lean4-nix
+          # This fork's default branch is `dev`; `main` is kept as a plain mirror
+          # of upstream, so both sides of the sync share the branch name.
+          branch: main
