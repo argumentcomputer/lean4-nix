@@ -4,8 +4,9 @@ name: Update toolchain
 
 on:
   schedule:
-    # Daily at 00:00 UTC
+    # Daily at midnight
     - cron: "0 0 * * *"
+      timezone: America/New_York
   workflow_dispatch:
 
 permissions:

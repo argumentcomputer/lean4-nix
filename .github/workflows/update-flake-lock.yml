@@ -1,0 +1,36 @@
+# Move nixpkgs and flake-parts to their latest revisions once a week and open
+# a PR against dev. Downstream flakes follow this one for nixpkgs, so this is
+# the one place that pin advances; they pick it up when lean-update bumps
+# their lean4-nix input on the next Lean release.
+name: Update flake inputs
+
+on:
+  schedule:
+    # Weekly on Monday at midnight
+    - cron: "0 0 * * 1"
+      timezone: America/New_York
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    name: Update flake.lock
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
+        with:
+          github_access_token: ${{ github.token }}
+      # A fixed branch name means a still-open PR is updated in place rather
+      # than a second one opened. The PR is opened with GITHUB_TOKEN, so CI
+      # runs once a maintainer closes and reopens it.
+      - uses: DeterminateSystems/update-flake-lock@da03c0f078bc4b2c37ee4f7e072d34bf8f188bb3 # v29
+        with:
+          branch: update/flake-lock
+          commit-msg: "chore: Update flake inputs"
+          pr-title: "chore: Update flake inputs"

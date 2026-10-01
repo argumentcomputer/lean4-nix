@@ -1,9 +1,10 @@
-# Pull upstream changes from lenianiva/lean4-nix daily at 12am UTC
+# Pull upstream changes from lenianiva/lean4-nix daily at midnight
 name: Repo sync
 
 on:
   schedule:
-  - cron:  "0 0 * * *"
+    - cron: "0 0 * * *"
+      timezone: America/New_York
   workflow_dispatch:
 
 permissions: {}
