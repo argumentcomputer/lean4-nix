@@ -34,6 +34,66 @@ let
     lakeArtifacts = incrementalLib;
     installArtifacts = false;
   };
+  # The executable installed for standalone use: wrapped, with its own
+  # modules and its dependencies' under `lib/lean`.
+  incrementalBin = lake2nix.mkPackage {
+    name = "IncrementalTest";
+    src = srcOf "incremental";
+    lakeDeps = incrementalDeps;
+    lakeArtifacts = incrementalLib;
+    installBin = true;
+  };
+  # The same chain with every artifact store archived: dependencies, the
+  # library, and the executable continuing from both.
+  zstdDeps = lake2nix.buildDeps {
+    src = srcOf "incremental";
+    depOverride = builtins.mapAttrs (_: _: { artifactsFormat = "zstd"; }) incrementalDeps;
+  };
+  zstdLib = lake2nix.mkPackage {
+    name = "Incremental";
+    src = srcOf "incremental";
+    lakeDeps = zstdDeps;
+    buildLibrary = true;
+    artifactsFormat = "zstd";
+  };
+  zstdBin = lake2nix.mkPackage {
+    name = "IncrementalTest";
+    src = srcOf "incremental";
+    lakeDeps = zstdDeps;
+    lakeArtifacts = zstdLib;
+    installBin = true;
+  };
+  # Runs an `installBin` IncrementalTest and checks the install layout around it.
+  checkBin =
+    name: pkg:
+    pkgs.runCommand name { } ''
+      [ "$(${pkg}/bin/IncrementalTest)" = "hello has 2 l chars" ]
+      grep -q LEAN_PATH ${pkg}/bin/IncrementalTest
+      test -f ${pkg}/lib/lean/Incremental.olean
+      test -f ${pkg}/lib/lean/Batteries.olean
+      test ! -e ${pkg}/.lake
+      touch $out
+    '';
+
+  # An executable that evaluates a definition through the interpreter from a
+  # module it does not import at compile time, so the code is not linked in
+  # and Lean needs the module's IR from `lib/lean`.
+  interpretSrc = lake2nix.cleanLakeSource ./test/interpret;
+  interpretBin = lake2nix.mkPackage {
+    name = "Interpret";
+    src = interpretSrc;
+    installBin = true;
+  };
+  interpretOleansOnly = lake2nix.mkPackage {
+    name = "Interpret";
+    src = interpretSrc;
+    installBin = true;
+    binFiles = [
+      "*.olean"
+      "*.olean.private"
+      "*.olean.server"
+    ];
+  };
 
   # `dependency` is required from `incremental` by path, which is how Lake sees
   # a `lakefile.lean` dependency in a consumer workspace. Lake re-elaborates
@@ -104,6 +164,23 @@ in
 
   # A test target reusing the library target's `.lake` artifacts.
   incremental = incrementalTest;
+
+  # An executable installed for standalone use.
+  install-bin = checkBin "install-bin" incrementalBin;
+
+  # Archived artifacts unpacked at every step of the chain.
+  zstd = checkBin "zstd" zstdBin;
+
+  # The default `binFiles` carry the IR the interpreter needs for code that
+  # is not linked into the binary; without it the same program fails.
+  interpret = pkgs.runCommand "interpret" { } ''
+    [ "$(${interpretBin}/bin/Interpret)" = "hello from the interpreter" ]
+    if ${interpretOleansOnly}/bin/Interpret 2> /dev/null; then
+      echo "Interpret ran without IR files, so the check no longer tests them" >&2
+      exit 1
+    fi
+    touch $out
+  '';
 
   # A `lakefile.lean` dependency imported into another package.
   incremental-dep = crossPkg;

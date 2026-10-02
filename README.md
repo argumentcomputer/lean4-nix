@@ -149,7 +149,30 @@ output is a derivation. It takes the following arguments:
 - `lakeArtifacts`: If provided, copy the `.lake` artifacts from another
   derivation for incremental builds
 - `buildLibrary ? false`: Whether to build library facets for the `name` build target
-- `installArtifacts ? true`: Whether to export `.lake` artifacts and source in the derivation `outPath` for incremental builds
+- `installArtifacts ? !installBin`: Whether to export `.lake` artifacts and
+  source in the derivation `outPath`, for incremental builds and for packages
+  that depend on this one. A package installed with `installBin` is a leaf and
+  exports nothing unless asked, as crane's `buildPackage` keeps no cargo
+  artifacts; everything else exports by default.
+- `artifactsFormat ? "tree"`: How exported artifacts are stored. `"tree"` keeps
+  the directory layout; `"zstd"` packs the source and `.lake` into a single
+  `lake-artifacts.tar.zst`, which is several times smaller and a single file
+  for Nix to hash and scan. Consumers (`lakeArtifacts`, `lakeDeps`,
+  `depOverride`) unpack either format transparently.
+- `installBin ? false`: Whether to install the package's executables for
+  standalone use. Each binary under `bin/` is wrapped with `LEAN_SYSROOT` set
+  and `lib/lean` prepended to `LEAN_PATH`, so a search path from the
+  environment (under `lake env`, say) stays visible behind it. That directory
+  holds the module files of every module the binary can import at runtime (its
+  own, those from `lakeArtifacts`, and its dependencies'), so the output is
+  self-contained.
+- `binFiles`: Module files `installBin` installs under `lib/lean`, as
+  `find`-style name patterns. Defaults to the three olean parts plus `.ir.sig`
+  and `.ir`. Lean reads all three olean parts when importing a module compiled
+  with `module`. The IR files serve the interpreter for declarations without
+  native code in the binary: a classic module carries its IR inside the olean,
+  but a `module` keeps it in `.ir.sig` and `.ir`, so a package whose binaries
+  link everything they import can drop them and nothing else should.
 - `configurePhase`: If provided, override the configure phase
 - `buildPhase`: If provided, override the build phase
 - `installPhase`: If provided, override the install phase

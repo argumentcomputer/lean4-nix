@@ -55,8 +55,9 @@
               name = "IncrementalTest";
               # Copy `.lake` artifacts from library derivation
               lakeArtifacts = incLib;
-              # Don't export source code or `.lake` artifacts, since a test won't be used as a dependency
-              installArtifacts = false;
+              # Install the executable wrapped for standalone use, with the
+              # modules it can import at runtime under `lib/lean`
+              installBin = true;
             }
           );
         in
