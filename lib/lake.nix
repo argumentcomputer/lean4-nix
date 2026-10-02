@@ -78,20 +78,20 @@ let
       # is self-contained, so the runtime closure carries none of the build
       # trees.
       installBin ? false,
-      # Module files `installBin` keeps, as `find`-style name patterns.
-      # Lean reads all three olean parts unconditionally when importing a
-      # module compiled with `module`, so they belong together. The IR files
-      # serve the interpreter for declarations that have no native code in
-      # the binary: a classic module carries its IR inside the olean, but a
-      # `module` keeps it in `.ir.sig` and `.ir`, so without them evaluating
-      # such a declaration fails. A package whose binaries link every module
-      # they import can drop them.
+      # Module files `installBin` keeps, as `find`-style name patterns. Lean
+      # reads all three olean parts unconditionally when importing a module
+      # compiled with `module`, so they belong together, and they are all a
+      # binary needs when every module it imports at runtime is linked into
+      # it. A binary that evaluates a declaration from a module it does not
+      # import at compile time, or imports such a `module` with `loadExts`
+      # and so runs its initializers, also needs that module's compiled
+      # code: a classic module carries it inside the olean, but a `module`
+      # keeps it in `.ir.sig` and `.ir` beside the olean, so add those two
+      # patterns.
       binFiles ? [
         "*.olean"
         "*.olean.private"
         "*.olean.server"
-        "*.ir.sig"
-        "*.ir"
       ],
       ...
     }:

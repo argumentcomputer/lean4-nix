@@ -79,12 +79,12 @@ let
   # module it does not import at compile time, so the code is not linked in
   # and Lean needs the module's IR from `lib/lean`.
   interpretSrc = lake2nix.cleanLakeSource ./test/interpret;
-  interpretBin = lake2nix.mkPackage {
+  interpretDefault = lake2nix.mkPackage {
     name = "Interpret";
     src = interpretSrc;
     installBin = true;
   };
-  interpretOleansOnly = lake2nix.mkPackage {
+  interpretWithIR = lake2nix.mkPackage {
     name = "Interpret";
     src = interpretSrc;
     installBin = true;
@@ -92,6 +92,8 @@ let
       "*.olean"
       "*.olean.private"
       "*.olean.server"
+      "*.ir.sig"
+      "*.ir"
     ];
   };
 
@@ -171,11 +173,11 @@ in
   # Archived artifacts unpacked at every step of the chain.
   zstd = checkBin "zstd" zstdBin;
 
-  # The default `binFiles` carry the IR the interpreter needs for code that
-  # is not linked into the binary; without it the same program fails.
+  # A binary that runs code from a module it does not link needs the IR
+  # patterns added to `binFiles`; with the default it fails.
   interpret = pkgs.runCommand "interpret" { } ''
-    [ "$(${interpretBin}/bin/Interpret)" = "hello from the interpreter" ]
-    if ${interpretOleansOnly}/bin/Interpret 2> /dev/null; then
+    [ "$(${interpretWithIR}/bin/Interpret)" = "hello from the interpreter" ]
+    if ${interpretDefault}/bin/Interpret 2> /dev/null; then
       echo "Interpret ran without IR files, so the check no longer tests them" >&2
       exit 1
     fi

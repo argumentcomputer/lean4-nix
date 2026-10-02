@@ -167,12 +167,16 @@ output is a derivation. It takes the following arguments:
   own, those from `lakeArtifacts`, and its dependencies'), so the output is
   self-contained.
 - `binFiles`: Module files `installBin` installs under `lib/lean`, as
-  `find`-style name patterns. Defaults to the three olean parts plus `.ir.sig`
-  and `.ir`. Lean reads all three olean parts when importing a module compiled
-  with `module`. The IR files serve the interpreter for declarations without
-  native code in the binary: a classic module carries its IR inside the olean,
-  but a `module` keeps it in `.ir.sig` and `.ir`, so a package whose binaries
-  link everything they import can drop them and nothing else should.
+  `find`-style name patterns. Defaults to the three olean parts, which Lean
+  reads together when importing a module compiled with `module`, and which are
+  all a binary needs when every module it imports at runtime is linked into
+  it. A binary that evaluates a declaration from a module it does not import
+  at compile time, or imports such a `module` with `loadExts` and so runs its
+  initializers, also needs that module's compiled code. A classic module
+  carries it inside the olean; a `module` keeps it in `.ir.sig` and `.ir`
+  beside the olean, so such a package adds `"*.ir.sig"` and `"*.ir"` to the
+  list. Without them the failure is a runtime `unknown declaration` error
+  naming the missing declaration.
 - `configurePhase`: If provided, override the configure phase
 - `buildPhase`: If provided, override the build phase
 - `installPhase`: If provided, override the install phase
