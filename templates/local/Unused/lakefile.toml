@@ -1,0 +1,6 @@
+name = "unused"
+version = "0.1.0"
+defaultTargets = ["Unused"]
+
+[[lean_lib]]
+name = "Unused"

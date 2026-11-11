@@ -11,5 +11,9 @@ rec {
     path = ./incremental;
     description = "With Incremental builds";
   };
+  local = {
+    path = ./local;
+    description = "With Local packages";
+  };
   default = minimal;
 }

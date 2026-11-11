@@ -1,0 +1,16 @@
+name = "Local"
+version = "0.1.0"
+defaultTargets = ["local"]
+
+[[require]]
+name = "greeting"
+path = "Greeting"
+
+# Required but not imported by `local`, so a `local` build never builds it
+[[require]]
+name = "unused"
+path = "Unused"
+
+[[lean_exe]]
+name = "local"
+root = "Main"
