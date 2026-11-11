@@ -7,3 +7,6 @@
 
 # Generated against the local checkout when testing templates
 templates/**/flake.lock
+
+# direnv
+.direnv/

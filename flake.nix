@@ -1,6 +1,15 @@
 {
   description = "Lean 4 Nix Flake";
 
+  nixConfig = {
+    extra-substituters = [
+      "https://argumentcomputer.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "argumentcomputer.cachix.org-1:ovhbTx1V56BYDerOWInQvXKXl68LlhNwEA+n7EWk1m4="
+    ];
+  };
+
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
