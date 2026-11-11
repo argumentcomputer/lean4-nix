@@ -154,6 +154,17 @@ let
           ''}
           runHook postInstall
         '';
+
+        # The dependency shadows make the output tens of thousands of
+        # symlinks, all pointing at other store paths. stdenv's post-fixup
+        # hooks that rewrite symlinks into the output as relative ones and
+        # reject dangling ones walk every symlink in a shell loop, which
+        # dominates fixup: about a minute for ix's library output, against
+        # about a second with both off. Neither applies here: no symlink
+        # points into the output itself, and every target is a dependency in
+        # the closure.
+        dontRewriteSymlinks = true;
+        dontCheckForBrokenSymlinks = true;
       }
       # Prevents implicit arguments from being coerced to input strings in `mkDerivation`
       // (builtins.removeAttrs args [
