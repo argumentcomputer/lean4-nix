@@ -20,6 +20,32 @@ let
     lib.warnIf (manifest.version != "1.1.0" && manifest.version != "1.2.0") (
       "Unknown version: " + builtins.toString manifest.version
     ) manifest;
+  # Name of the archive an `artifactsFormat = "zstd"` output holds in place of
+  # the workspace tree.
+  artifactsArchive = "lake-artifacts.tar.zst";
+  # How a derivation built here stores its artifacts. Derivations from
+  # elsewhere (e.g. `depOverrideDeriv`) are plain trees.
+  artifactsFormatOf = drv: drv.lakeArtifactsFormat or "tree";
+  # Shell snippet streaming the archive of `drv` into `tar -x` with the given
+  # extraction arguments. The archive stores every entry with `u+w`, so the
+  # copy comes out writable without a `chmod` pass.
+  extractArchive = drv: tarArgs: ''
+    zstd -d "${drv}/${artifactsArchive}" --stdout | tar -x ${tarArgs}
+  '';
+  # Shell snippet placing the artifacts of `drv` at `dest`, whichever format
+  # they are stored in. A tree is shadowed: directories are created and files
+  # symlinked into the store. An archive unpacks to a real writable copy.
+  unpackArtifacts =
+    drv: dest:
+    if artifactsFormatOf drv == "zstd" then
+      ''
+        mkdir -p "${dest}"
+        ${extractArchive drv ''-C "${dest}"''}
+      ''
+    else
+      ''
+        cp -rs "${drv}" "${dest}"
+      '';
   # Git packages get their own derivations and shadow directories. Path
   # packages are part of the workspace that contains them and are built there.
   isGitPackage = package: (package.type or "git") == "git";
@@ -35,13 +61,51 @@ let
       # Whether to build `shared` and `static` facets of a library target.
       buildLibrary ? false,
       # Whether to export the workspace (source and every build output) for
-      # incremental builds and use as a dependency
-      installArtifacts ? true,
+      # incremental builds and use as a dependency. A package installed with
+      # `installBin` is a leaf nothing builds on, so it exports nothing unless
+      # asked, as crane's `buildPackage` keeps no cargo artifacts; everything
+      # else exports, since libraries are consumed as dependencies through
+      # `mkPackage` without any other marker.
+      installArtifacts ? !installBin,
+      # How exported artifacts are stored: "tree" keeps the workspace layout
+      # in the output, "zstd" packs it into one `lake-artifacts.tar.zst` that
+      # consumers unpack. Oleans and objects compress several times over, and
+      # the archive is a single file for Nix to hash, scan for references,
+      # and fix up.
+      artifactsFormat ? "tree",
       # Whether to record the runtime search path in `nix-support/lean-path`
-      # for `wrapExecutables`. Only takes effect with `installArtifacts`.
+      # for `wrapExecutables`. Only takes effect with a "tree" export, since
+      # the paths it records must exist in the output.
       recordLeanPath ? false,
+      # Whether to install the package's executables for standalone use. Each
+      # binary under `bin/` is wrapped with `LEAN_SYSROOT` set and `lib/lean`
+      # prepended to `LEAN_PATH`; that directory holds the module files of
+      # every module on Lake's search path for the workspace: the package's
+      # own, its local packages', those inherited through `lakeArtifacts`,
+      # and its dependencies'. The output is self-contained, so the runtime
+      # closure carries none of the build trees.
+      installBin ? false,
+      # Module files `installBin` keeps, as `find`-style name patterns.
+      # Lean reads all three olean parts unconditionally when importing a
+      # module compiled with `module`, so they belong together. The IR files
+      # serve the interpreter for declarations that have no native code in
+      # the binary: a classic module carries its IR inside the olean, but a
+      # `module` keeps it in `.ir.sig` and `.ir`, so without them evaluating
+      # such a declaration fails. A package whose binaries link every module
+      # they import can drop them.
+      binFiles ? [
+        "*.olean"
+        "*.olean.private"
+        "*.olean.server"
+        "*.ir.sig"
+        "*.ir"
+      ],
       ...
     }:
+    assert lib.assertOneOf "artifactsFormat" artifactsFormat [
+      "tree"
+      "zstd"
+    ];
     let
       manifest = importLakeManifest "${src}/lake-manifest.json";
       # Creates a surrogate manifest pointing Git packages at local shadow
@@ -64,6 +128,13 @@ let
         )
       );
       replaceManifestJson = pkgs.writers.writeJSON "lake-manifest.json" replaceManifest;
+      writesLeanPath = recordLeanPath && installArtifacts && artifactsFormat == "tree";
+      usesZstd =
+        artifactsFormat == "zstd"
+        || lib.any (drv: artifactsFormatOf drv == "zstd") (
+          lib.toList (args.lakeArtifacts or [ ]) ++ builtins.attrValues deps
+        );
+      binIncludes = lib.concatMapStringsSep " " (p: "--include='${p}'") binFiles;
     in
     stdenv.mkDerivation (
       {
@@ -76,21 +147,27 @@ let
         # from the Nix store. For `lakefile.lean` deps (detected by `.lake/config`
         # existing), `.lake/` is replaced with real writable copies since Lake
         # re-elaborates configs and may rebuild artifacts in a consumer workspace.
-        # A shadow restored from `lakeArtifacts` is replaced, since `cp -rs`
+        # Archived dependencies unpack to real writable copies either way. A
+        # shadow restored from `lakeArtifacts` is replaced, since `cp -rs`
         # into an existing directory would nest a second copy inside it.
         configurePhase = ''
           runHook preConfigure
           mkdir -p .lake/packages
           ${lib.concatStringsSep "\n" (
-            lib.mapAttrsToList (depName: depPath: ''
-              rm -rf ".lake/packages/${depName}"
-              cp -rs "${depPath}" ".lake/packages/${depName}"
-              if [ -d "${depPath}/.lake/config" ]; then
-                chmod -R +w ".lake/packages/${depName}/.lake"
-                rm -rf ".lake/packages/${depName}/.lake"/*
-                cp -rP --no-preserve=mode "${depPath}/.lake"/* ".lake/packages/${depName}/.lake/"
-              fi
-            '') deps
+            lib.mapAttrsToList (
+              depName: depPath:
+              ''
+                rm -rf ".lake/packages/${depName}"
+              ''
+              + unpackArtifacts depPath ".lake/packages/${depName}"
+              + lib.optionalString (artifactsFormatOf depPath != "zstd") ''
+                if [ -d "${depPath}/.lake/config" ]; then
+                  chmod -R +w ".lake/packages/${depName}/.lake"
+                  rm -rf ".lake/packages/${depName}/.lake"/*
+                  cp -rP --no-preserve=mode "${depPath}/.lake"/* ".lake/packages/${depName}/.lake/"
+                fi
+              ''
+            ) deps
           )}
           if [ ! -e .lake/package-overrides.json ]; then
             ln -s ${replaceManifestJson} .lake/package-overrides.json
@@ -110,50 +187,105 @@ let
           runHook postBuild
         '';
 
-        # Copies the whole workspace to the out path: the source, every
-        # package's build output (local packages and custom `buildDir`s
-        # included), the dependency shadows, and anything hooks placed there.
-        # The source was already filtered on the way in, so nothing else needs
-        # excluding.
+        # Exports the whole workspace: the source, every package's build
+        # output (local packages and custom `buildDir`s included), and
+        # anything hooks placed there. The source was already filtered on the
+        # way in, so nothing else needs excluding. A "tree" export also keeps
+        # the dependency shadows; an archive leaves them out, since consumers
+        # recreate them from their own dependencies and the store paths they
+        # point at would be hidden from Nix's reference scan inside it.
         #
-        # With `recordLeanPath`, Lake's own search path is recorded with the
-        # build directory replaced by `$out`. Entries for packages Lake
-        # configured but never built do not exist and are dropped, as is the
-        # toolchain's, which `LEAN_SYSROOT` covers. Normalising must not
-        # resolve symlinks, or an entry reached through a dependency shadow
-        # could turn into a store path and be dropped with the toolchain.
-        # TODO: Compress into zstd tarball instead of cp
-        # https://github.com/ipetkov/crane/blob/master/lib/setupHooks/installCargoArtifactsHook.sh#L39
+        # Lake's own search path drives both `recordLeanPath` and `installBin`:
+        # its entries inside the workspace, in Lake's order. Entries for
+        # packages Lake configured but never built do not exist and are
+        # dropped, as is the toolchain's, which `LEAN_SYSROOT` covers.
+        # Normalising must not resolve symlinks, or an entry reached through a
+        # dependency shadow could turn into a store path and be dropped with
+        # the toolchain.
         installPhase = ''
           runHook preInstall
           mkdir -p $out/
-          ${lib.optionalString installArtifacts ''
-            cp -rPT . "$out"
-            ${lib.optionalString recordLeanPath ''
-              mkdir -p "$out/nix-support"
-              leanPath=()
-              declare -A seenLeanPath=()
-              IFS=: read -ra rawLeanPath <<< "$(lake env printenv LEAN_PATH)"
-              for entry in "''${rawLeanPath[@]}"; do
-                [ -n "$entry" ] || continue
-                entry=$(realpath -ms "$entry")
-                [ -z "''${seenLeanPath[$entry]:-}" ] || continue
-                seenLeanPath[$entry]=1
-                [ -e "$entry" ] || continue
-                case "$entry" in
-                  ${builtins.storeDir}/*) ;;
-                  "$PWD"/*) leanPath+=("$out/''${entry#"$PWD"/}") ;;
-                  *)
-                    echo "lake2nix: LEAN_PATH entry $entry is outside the workspace and cannot be installed" >&2
-                    exit 1
-                    ;;
-                esac
-              done
-              (IFS=:; printf '%s\n' "''${leanPath[*]}") > "$out/nix-support/lean-path"
-            ''}
+          ${lib.optionalString installArtifacts (
+            if artifactsFormat == "zstd" then
+              # Reproducible archive, as crane writes its cargo artifacts:
+              # fixed ordering, timestamps and ownership, no atime/ctime pax
+              # headers, and `u+w` so consumers can unpack straight into a
+              # writable build directory. Lake tracks inputs by content hash,
+              # so the flattened timestamps do not trigger rebuilds.
+              ''
+                (
+                  export SOURCE_DATE_EPOCH=1
+                  tar \
+                    --sort=name \
+                    --mtime="@$SOURCE_DATE_EPOCH" \
+                    --owner=0 \
+                    --group=0 \
+                    --mode=u+w \
+                    --numeric-owner \
+                    --pax-option=exthdr.name=%d/PaxHeaders/%f,delete=atime,delete=ctime \
+                    --exclude=./.lake/packages \
+                    -c . \
+                    | zstd "-T''${NIX_BUILD_CORES:-0}" -o "$out/${artifactsArchive}"
+                )
+              ''
+            else
+              ''
+                cp -rPT . "$out"
+              ''
+          )}
+          ${lib.optionalString (writesLeanPath || installBin) ''
+            leanPath=()
+            declare -A seenLeanPath=()
+            IFS=: read -ra rawLeanPath <<< "$(lake env printenv LEAN_PATH)"
+            for entry in "''${rawLeanPath[@]}"; do
+              [ -n "$entry" ] || continue
+              entry=$(realpath -ms "$entry")
+              [ -z "''${seenLeanPath[$entry]:-}" ] || continue
+              seenLeanPath[$entry]=1
+              [ -e "$entry" ] || continue
+              case "$entry" in
+                ${builtins.storeDir}/*) ;;
+                "$PWD"/*) leanPath+=("''${entry#"$PWD"/}") ;;
+                *)
+                  echo "lake2nix: LEAN_PATH entry $entry is outside the workspace and cannot be installed" >&2
+                  exit 1
+                  ;;
+              esac
+            done
+          ''}
+          ${lib.optionalString writesLeanPath ''
+            mkdir -p "$out/nix-support"
+            (IFS=:; printf '%s\n' "''${leanPath[*]/#/$out/}") > "$out/nix-support/lean-path"
+          ''}
+          ${lib.optionalString installBin ''
+            # Earlier search path entries take precedence, as in Lean's lookup.
+            mkdir -p $out/lib/lean $out/bin
+            for entry in "''${leanPath[@]}"; do
+              rsync -aL --ignore-existing --prune-empty-dirs --include='*/' ${binIncludes} --exclude='*' \
+                "$entry"/ $out/lib/lean/
+            done
+            if [ -d .lake/build/bin ]; then
+              find .lake/build/bin -maxdepth 1 -type f -executable \
+                -exec install -Dm755 -t $out/bin {} +
+            fi
+            # `lib/lean` is prepended rather than set: under `lake env` the
+            # project's own search path must stay visible behind it.
+            for exe in $out/bin/*; do
+              wrapProgram "$exe" \
+                --set LEAN_SYSROOT "${lean}" \
+                --prefix LEAN_PATH : "$out/lib/lean"
+            done
           ''}
           runHook postInstall
         '';
+
+        passthru = (args.passthru or { }) // {
+          lakeArtifactsFormat = artifactsFormat;
+        };
+        nativeBuildInputs =
+          (args.nativeBuildInputs or [ ])
+          ++ lib.optional usesZstd pkgs.zstd
+          ++ lib.optional installBin pkgs.makeWrapper;
 
         # The dependency shadows make the output tens of thousands of
         # symlinks, all pointing at other store paths. stdenv's post-fixup
@@ -173,6 +305,11 @@ let
         "depOverrideDeriv"
         "lakeDeps"
         "lakeArtifacts"
+        "artifactsFormat"
+        "installBin"
+        "binFiles"
+        "nativeBuildInputs"
+        "passthru"
       ])
     );
 
@@ -263,14 +400,26 @@ let
       # already has is overwritten. Restored files are made writable, since
       # Lake may rebuild them, and get fresh modification times, as a plain
       # copy gives them. The package overrides belong to `configurePhase`.
-      restoreArtifacts = lib.optionalString (args ? lakeArtifacts) ''
-        for drv in ${lib.escapeShellArgs (map toString (lib.toList args.lakeArtifacts))}; do
-          rsync -rlp --chmod=u+w --ignore-existing --prune-empty-dirs \
-            --exclude=/.lake/package-overrides.json \
-            --include='*/' --include='.lake/***' --exclude='*' \
-            "$drv/" ./
-        done
+      # An archive is unpacked aside first so both formats merge by the same
+      # rule.
+      restoreTree = dir: ''
+        rsync -rlp --chmod=u+w --ignore-existing --prune-empty-dirs \
+          --exclude=/.lake/package-overrides.json \
+          --include='*/' --include='.lake/***' --exclude='*' \
+          "${dir}/" ./
       '';
+      restoreArtifacts = lib.concatMapStrings (
+        drv:
+        if artifactsFormatOf drv == "zstd" then
+          ''
+            restoreDir=$(mktemp -d)
+            ${extractArchive drv ''-C "$restoreDir"''}
+            ${restoreTree "$restoreDir"}
+            rm -rf "$restoreDir"
+          ''
+        else
+          restoreTree drv
+      ) (lib.toList (args.lakeArtifacts or [ ]));
     in
     mkLakeDerivation (
       {
@@ -279,20 +428,19 @@ let
       // args
       // {
         inherit name src deps;
-        nativeBuildInputs = staticLibDeps;
+        nativeBuildInputs = staticLibDeps ++ (args.nativeBuildInputs or [ ]);
 
-        # TODO: Use zstd tarball instead of rsync
-        # https://github.com/ipetkov/crane/blob/master/lib/setupHooks/inheritCargoArtifactsHook.sh#L28
         # Runs before, not instead of, the caller's own `prePatch`
         prePatch = restoreArtifacts + (args.prePatch or "");
 
-        # Copies any executable to the out path, as well as the source and `.lake` artifacts if specified
+        # Copies any executable to the out path. `installBin` installs and
+        # wraps them itself.
         postInstall =
-          args.postInstall or ''
+          args.postInstall or (lib.optionalString (!(args.installBin or false)) ''
             if [ -d .lake/build/bin ]; then
               cp -R .lake/build/bin $out
             fi
-          '';
+          '');
       }
     );
 
@@ -313,7 +461,7 @@ let
       ''
         leanPath=${drv}/nix-support/lean-path
         if [ ! -f "$leanPath" ]; then
-          echo "wrapExecutables: $leanPath is missing; build ${drv.name} with installArtifacts = true" >&2
+          echo "wrapExecutables: $leanPath is missing; build ${drv.name} with installArtifacts = true and artifactsFormat = \"tree\", or use installBin" >&2
           exit 1
         fi
         mkdir -p $out/bin
